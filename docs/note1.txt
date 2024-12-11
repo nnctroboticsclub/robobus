@@ -1,0 +1,4 @@
+
+DebugInfo::interval(Clock::duration interval)
+// 随時 Update するのをやめる
+// ctx.AddTask で定期的に Update するタスクを起動する
