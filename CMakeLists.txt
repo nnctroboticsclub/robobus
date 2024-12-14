@@ -8,3 +8,8 @@ target_link_libraries(robobus INTERFACE
     syoch-robotics-logger
     rd16
 )
+
+target_compile_options(robobus INTERFACE
+    -fcoroutines
+    -fconcepts
+)
