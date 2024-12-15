@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <logger/logger.hpp>
-#include <robobus/internal/signal.hpp>
-#include <robobus/internal/multi_updatable.hpp>
+#include <memory>
 #include <rd16.hpp>
+#include "../internal/multi_updatable.hpp"
+#include "../internal/signal.hpp"
 
 namespace robobus::network::internal::cstream {
 using robobus::internal::MultiUpdatable;
@@ -27,7 +29,7 @@ class ControlStreamState {
   void MixCode(uint32_t code) { data_ = (data_ * code + code) ^ (data_ >> 16); }
 
   /// @brief データを取得
-  uint32_t Get() const { return data_; }
+  [[nodiscard]] uint32_t Get() const { return data_; }
 
   /// @brief データを設定
   void Set(uint32_t data) { data_ = data; }
@@ -91,7 +93,7 @@ class ControlStream_Inbound {
   SignalRx<int> is_ok_{is_ok_signal_};
 
  public:
-  void FeedData(DataType const &data) {
+  void FeedData(DataType const& data) {
     // logger.Trace("Feed data");
     has_new_data_ = true;
     is_ok_value_ = false;
@@ -221,9 +223,9 @@ class ControlStream {
 
   ControlStream() {
     outbound_.state_validate_.updated.Connect(
-        [this](ControlStreamState const &) { ProcessTxControlData(); });
+        [this](ControlStreamState const&) { ProcessTxControlData(); });
     inbound_.state_feedback.updated.Connect(
-        [this](ControlStreamState const &) { ProcessTxControlData(); });
+        [this](ControlStreamState const&) { ProcessTxControlData(); });
   }
 
   void LoadRxControlData(CtrlDataTYpe data) {
@@ -237,9 +239,9 @@ class ControlStream {
     outbound_.SetStateFeedback(ControlStreamState{h_of});
   }
 
-  void PutTxData(DataType const &data) { outbound_.SetData(data); }
+  void PutTxData(DataType const& data) { outbound_.SetData(data); }
 
-  void FeedRxData(DataType const &data) { inbound_.FeedData(data); }
+  void FeedRxData(DataType const& data) { inbound_.FeedData(data); }
 
   void Tick(float delta_time_s) {
     inbound_.Tick(delta_time_s);
