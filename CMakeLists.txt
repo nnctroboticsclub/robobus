@@ -9,8 +9,3 @@ target_link_libraries(robobus INTERFACE
     dcan
     rd16
 )
-
-target_compile_options(robobus INTERFACE
-    -fcoroutines
-    -fconcepts
-)

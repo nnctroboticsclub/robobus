@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 #include <logger/logger.hpp>
 #include <memory>
 #include <robotics/network/can_base.hpp>
