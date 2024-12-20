@@ -1,8 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
-#include <functional>
 
 namespace robobus::internal {
 

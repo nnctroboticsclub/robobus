@@ -6,6 +6,4 @@ target_include_directories(robobus INTERFACE
 
 target_link_libraries(robobus INTERFACE
     syoch-robotics-logger
-    dcan
-    rd16
 )

@@ -1,23 +1,21 @@
 #pragma once
 
-#include <optional>
 #include <cstring>
+#include <optional>
 
 #include <logger/logger.hpp>
 
-#include "root_context.hpp"
 #include "../debug/debug_info.hpp"
 #include "../runtime/sleep.hpp"
+#include "root_context.hpp"
 
 namespace robobus::context {
 template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
-class SharedContext;
+requires std::chrono::is_clock_v<Clock> class SharedContext;
 
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
-struct Context {
+requires std::chrono::is_clock_v<Clock> struct Context {
  private:
   std::string tag_;
   std::string path_;
@@ -70,8 +68,7 @@ struct Context {
 };
 
 template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
-class SharedContext {
+requires std::chrono::is_clock_v<Clock> class SharedContext {
   std::shared_ptr<Context<Clock>> ctx;
 
  public:

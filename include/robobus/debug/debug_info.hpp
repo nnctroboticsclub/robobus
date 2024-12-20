@@ -7,8 +7,7 @@
 
 namespace robobus::context {
 template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
-class SharedContext;
+requires std::chrono::is_clock_v<Clock> class SharedContext;
 }
 
 namespace robobus::debug {

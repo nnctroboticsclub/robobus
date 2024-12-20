@@ -4,8 +4,7 @@
 
 namespace robobus::runtime {
 template <typename ClockT>
-  requires std::chrono::is_clock_v<ClockT>
-class TimeContext {
+requires std::chrono::is_clock_v<ClockT> class TimeContext {
   using time_point = ClockT::time_point;
   using duration = ClockT::duration;
 
