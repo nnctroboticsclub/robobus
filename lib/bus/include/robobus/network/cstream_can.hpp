@@ -6,7 +6,7 @@
 #include <robotics/network/can_base.hpp>
 #include <vector>
 
-#include "../internal/signal.hpp"
+#include <robobus/internal/signal.hpp>
 #include "./cstream.hpp"
 
 namespace robobus::network::internal::cstream_can {

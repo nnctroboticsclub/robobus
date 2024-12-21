@@ -4,8 +4,8 @@
 #include <logger/logger.hpp>
 #include <memory>
 #include <rd16.hpp>
-#include "../internal/multi_updatable.hpp"
-#include "../internal/signal.hpp"
+#include <robobus/internal/multi_updatable.hpp>
+#include <robobus/internal/signal.hpp>
 
 namespace robobus::network::internal::cstream {
 using robobus::internal::MultiUpdatable;
