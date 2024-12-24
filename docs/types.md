@@ -67,6 +67,8 @@ Component {type: u16, data: ...}
       page: u16
       c: Component
     }[]
+  0003[Auto]
+    part: Component[]
   0100[Label]
     text: u8[] @enc (utf8)
   0101[Action]
