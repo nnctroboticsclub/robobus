@@ -3,19 +3,18 @@
 #include <chrono>
 #include <thread>
 
-#include <robotics/thread/thread.hpp>
-
 #include "loop.hpp"
+#include "robobus/runtime/runtime_impls.hpp"
 
 namespace robobus::runtime {
 /// @brief Sleep を行うための awaiter
-template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
+template <runtime::RuntimeImpl Runtime>
 struct SleepAwaiter {
-  Loop<Clock> &ctx;
-  Clock::duration duration;
+  Loop<Runtime>& ctx;
+  Runtime::Clock::duration duration;
 
-  explicit SleepAwaiter(Loop<Clock> &ctx, Clock::duration duration)
+  explicit SleepAwaiter(Loop<Runtime>& ctx,
+                        typename Runtime::Clock::duration duration)
       : ctx(ctx), duration(duration) {}
 
   // Sleep が実行済かどうか
@@ -32,13 +31,12 @@ struct SleepAwaiter {
 };
 
 /// @brief Robobus Loop を用いて Sleep を行う
-/// @tparam Clock Clock の型
+/// @tparam Runtime Runtime の型
 /// @param ctx Loop のコンテキスト
 /// @param duration Sleep する時間
 /// @return Awaiter
-template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
-auto Sleep(Loop<Clock> &ctx, typename Clock::duration duration) {
+template <RuntimeImpl Runtime>
+auto Sleep(Loop<Runtime>& ctx, typename Runtime::Clock::duration duration) {
   return SleepAwaiter(ctx, duration);
 }
 }  // namespace robobus::runtime

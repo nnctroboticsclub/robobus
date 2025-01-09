@@ -1,34 +1,34 @@
 #pragma once
 
-#include <coroutine>
 #include <chrono>
+#include <coroutine>
 #include <list>
 
 #include <logger/logger.hpp>
 #include <robotics/thread/thread.hpp>
 
+#include "robobus/runtime/runtime_impls.hpp"
 #include "time_context.hpp"
 
 namespace robobus::runtime {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
-template <typename Clock>
-  requires std::chrono::is_clock_v<Clock>
+template <RuntimeImpl Runtime>
 class Loop {
-  static inline robotics::logger::Logger logger{"loop.robobus", "Loop "};
   std::list<std::coroutine_handle<>> coroutines_;
 
-  std::list<std::pair<typename Clock::time_point, std::coroutine_handle<>>>
+  std::list<
+      std::pair<typename Runtime::Clock::time_point, std::coroutine_handle<>>>
       resume_list_;
 
  public:
-  TimeContext<Clock> time;
+  TimeContext<typename Runtime::Clock> time;
 
  private:
   void ProcessResumeList() {
-    auto minimum_grace = Clock::duration::max();
+    auto minimum_grace = Runtime::Clock::duration::max();
     const auto now = time.Now();
 
-    for (auto &&[c_time, coro] : resume_list_) {
+    for (auto&& [c_time, coro] : resume_list_) {
       auto grace = c_time - now;
 
       if (0 < grace.count() && grace < minimum_grace) {
@@ -36,8 +36,6 @@ class Loop {
       }
 
       if (c_time <= now) {
-        logger.Info("Resume at %p (requested as resume in %d)", coro.address(),
-                    c_time.time_since_epoch().count());
         coro.resume();
 
         continue;
@@ -45,19 +43,12 @@ class Loop {
     }
 
     resume_list_.remove_if(
-        [this, now](auto const &pair) { return pair.first <= now; });
-
-    if (minimum_grace != Clock::duration::max() &&
-        minimum_grace > std::chrono::milliseconds(100)) {
-      logger.Debug("Sleeping for %d", minimum_grace.count());
-      robotics::system::SleepFor(
-          std::chrono::duration_cast<std::chrono::milliseconds>(minimum_grace));
-    }
+        [this, now](auto const& pair) { return pair.first <= now; });
   }
 
  public:
-  Loop(Loop const &) = delete;
-  Loop &operator=(Loop const &) = delete;
+  Loop(Loop const&) = delete;
+  Loop& operator=(Loop const&) = delete;
 
   Loop() = default;
 
@@ -66,24 +57,19 @@ class Loop {
     coroutines_.push_back(coroutine);
   }
 
-  void RequestResumeAt(typename Clock::time_point time_point,
+  void RequestResumeAt(typename Runtime::Clock::time_point time_point,
                        std::coroutine_handle<> coroutine) {
     auto now = time.Now().time_since_epoch();
     auto delta = time_point - time.Started();
 
-    logger.Info("Requested resume at %p in %d (now %d)", coroutine.address(),
-                delta.count(), now.count());
     resume_list_.push_back({time_point, coroutine});
   }
 
   //* Root context
-  [[noreturn]]
-  void Run() {
-    logger.Trace("Starting main loop");
+  [[noreturn]] void Run() {
     while (true) {
-      for (auto const &coroutine : coroutines_) {
+      for (auto const& coroutine : coroutines_) {
         if (coroutine.done()) {
-          logger.Info("Remove the %p", coroutine.address());
           coroutines_.remove(coroutine);
         }
       }

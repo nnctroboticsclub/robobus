@@ -4,19 +4,21 @@
 #include <string_view>
 
 #include <chrono>
+#include <utility>
+#include "robobus/runtime/runtime_impls.hpp"
 
 namespace robobus::context {
-template <typename Clock>
-requires std::chrono::is_clock_v<Clock> class SharedContext;
+template <runtime::RuntimeImpl Clock>
+class SharedContext;
 }
 
 namespace robobus::debug {
 
-template <typename Clock>
+template <runtime::RuntimeImpl Runtime>
 class DebugInfo {
  public:
-  explicit DebugInfo(context::SharedContext<Clock> ctx, std::string const& tag)
-      : ctx_(ctx), tag_(tag) {}
+  explicit DebugInfo(context::SharedContext<Runtime>* ctx, std::string tag)
+      : ctx_(ctx), tag_(std::move(tag)) {}
 
   auto Message(std::string_view message) -> void {
     auto adapter = ctx_.Root().lock()->GetDebugAdapter();
@@ -26,7 +28,7 @@ class DebugInfo {
   }
 
  private:
-  context::SharedContext<Clock> ctx_;
+  context::SharedContext<Runtime> ctx_;
   std::string tag_;
 };
 
