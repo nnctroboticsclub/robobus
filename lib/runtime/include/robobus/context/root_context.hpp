@@ -5,11 +5,12 @@
 #include "../debug/debug_adapter.hpp"
 #include "../runtime/loop.hpp"
 #include "robobus/context/context.hpp"
+#include "robobus/internal/string_literal.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 
 namespace robobus::context {
 
-template <runtime::RuntimeImpl Runtime>
+template <runtime::RuntimeImpl Runtime, internal::StringLiteral kPath>
 class Context;
 
 /// @brief コルーチンベースプログラムで用いるコンテキスト
@@ -23,12 +24,9 @@ class RootContext {
 
   auto GetLoop() -> runtime::Loop<Runtime>& { return loop_; }
 
-  inline auto AddTask(std::coroutine_handle<> coroutine) -> void {
-    loop_.AddTask(coroutine);
-  }
-
-  Context<Runtime>& Child(std::string tag) {
-    return *new Context<Runtime>(this, tag);
+  template <internal::StringLiteral tag>
+  auto& Child() {
+    return *new Context<Runtime, tag>(this);
   }
 };
 }  // namespace robobus::context

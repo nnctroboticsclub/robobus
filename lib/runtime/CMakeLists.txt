@@ -5,6 +5,7 @@ target_include_directories(robobus-runtime INTERFACE
 )
 
 target_link_libraries(robobus-runtime INTERFACE
+    syoch-robotics-common
     syoch-robotics-logger
     syoch-robotics-thread
 )

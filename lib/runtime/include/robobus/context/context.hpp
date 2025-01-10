@@ -8,6 +8,7 @@
 #include "../debug/debug_info.hpp"
 #include "../internal/sematicses.hpp"
 #include "../runtime/sleep.hpp"
+#include "robobus/internal/string_literal.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 #include "root_context.hpp"
 
@@ -15,40 +16,30 @@ namespace robobus::context {
 template <runtime::RuntimeImpl Runtime>
 class RootContext;
 
-/// @brief コルーチンベースプログラムで用いるコンテキスト
-template <runtime::RuntimeImpl Runtime, >
-class Context : public internal::NonCopyable<Context<Runtime>> {
- private:
-  std::string tag_;
-  std::string path_;
+template <internal::StringLiteral parent_path, internal::StringLiteral tag>
+constexpr auto ConcatPath = parent_path + '.' + tag;
 
+/// @brief コルーチンベースプログラムで用いるコンテキスト
+template <runtime::RuntimeImpl Runtime, internal::StringLiteral kPath>
+class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
+ private:
   RootContext<Runtime>* root_ctx_;
-  std::optional<robotics::logger::Logger> logger_;
+  robotics::logger::Logger* logger_;
 
  public:
-  explicit Context(RootContext<Runtime>* root, std::string_view tag,
-                   std::string_view parent_path)
-      : tag_(tag),
-        path_(std::string(parent_path) + "." + std::string(tag)),
-        root_ctx_(root) {}
-
-  explicit Context(RootContext<Runtime>* root, std::string_view tag)
-      : tag_(tag), path_(tag), root_ctx_(root) {}
+  explicit Context(RootContext<Runtime>* root) : root_ctx_(root) {}
 
   ~Context() = default;
 
-  auto ContextId() { return path_; }
+  constexpr char const* ContextId() { return kPath.data; }
 
-  RootContext<Runtime>* Root() { return root_ctx_; }
+  constexpr RootContext<Runtime>* Root() { return root_ctx_; }
 
-  runtime::Loop<Runtime>& GetLoop() { return Root()->GetLoop(); }
+  constexpr runtime::Loop<Runtime>& GetLoop() { return Root()->GetLoop(); }
 
-  Context<Runtime>* Child(std::string tag) {
-    return new Context<Runtime>(Root(), tag, ContextId());
-  }
-
-  inline auto AddTask(std::coroutine_handle<> coroutine) {
-    Root().Getloop().AddTask(coroutine);
+  template <internal::StringLiteral tag>
+  auto& Child() {
+    return *new Context<Runtime, ConcatPath<kPath, tag>>(Root());
   }
 
   auto Sleep(std::chrono::milliseconds duration) {
@@ -59,17 +50,15 @@ class Context : public internal::NonCopyable<Context<Runtime>> {
     return debug::DebugInfo<Runtime>(*this, ContextId() + "." + tag);
   }
 
-  auto Logger() -> robotics::logger::Logger& {
-    if (!logger_.has_value()) {
-      auto cid = ContextId();
+  auto& Logger() {
+    if (!logger_) {
+      auto cid_cstr = new char[decltype(kPath)::size + 1];
+      std::strcpy(cid_cstr, kPath.data);
 
-      auto cid_cstr = new char[cid.size() + 1];
-      std::strcpy(cid_cstr, cid.c_str());
-
-      logger_ = robotics::logger::Logger(tag_.c_str(), cid_cstr);
+      logger_ = new robotics::logger::Logger(cid_cstr, cid_cstr);
     }
 
-    return logger_.value();
+    return *logger_;
   }
 };
 

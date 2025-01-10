@@ -6,19 +6,24 @@
 
 #include <logger/logger.hpp>
 #include <robotics/thread/thread.hpp>
+#include <robotics/utils/linked_list_node.hpp>
+#include <robotics/utils/no_mutex_lifo.hpp>
 
 #include "robobus/runtime/runtime_impls.hpp"
 #include "time_context.hpp"
 
 namespace robobus::runtime {
+
+template <RuntimeImpl Runtime>
+struct ResumeRequest {
+  typename Runtime::Clock::time_point time_point;
+  std::coroutine_handle<> coroutine;
+};
+
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop {
-  std::list<std::coroutine_handle<>> coroutines_;
-
-  std::list<
-      std::pair<typename Runtime::Clock::time_point, std::coroutine_handle<>>>
-      resume_list_;
+  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 5> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
@@ -28,7 +33,13 @@ class Loop {
     auto minimum_grace = Runtime::Clock::duration::max();
     const auto now = time.Now();
 
-    for (auto&& [c_time, coro] : resume_list_) {
+    const size_t it_max = resume_list_lifo_.Size();
+    for (size_t i = 0; i < it_max && !resume_list_lifo_.Empty(); i++) {
+      auto ptr = resume_list_lifo_.Pop();
+
+      auto& c_time = ptr.time_point;
+      auto& coro = ptr.coroutine;
+
       auto grace = c_time - now;
 
       if (0 < grace.count() && grace < minimum_grace) {
@@ -39,41 +50,44 @@ class Loop {
         coro.resume();
 
         continue;
+      } else {
+        resume_list_lifo_.Push(ptr);
       }
     }
-
-    resume_list_.remove_if(
-        [this, now](auto const& pair) { return pair.first <= now; });
   }
 
  public:
   Loop(Loop const&) = delete;
   Loop& operator=(Loop const&) = delete;
 
-  Loop() = default;
+  Loop() {
+    while (!resume_list_lifo_.Full()) {
+      resume_list_lifo_.Push(ResumeRequest<Runtime>{});
+    }
+
+    while (!resume_list_lifo_.Empty()) {
+      resume_list_lifo_.Pop();
+    }
+  }
 
   //* Loop traits
-  void AddTask(std::coroutine_handle<> coroutine) {
-    coroutines_.push_back(coroutine);
-  }
 
   void RequestResumeAt(typename Runtime::Clock::time_point time_point,
                        std::coroutine_handle<> coroutine) {
     auto now = time.Now().time_since_epoch();
     auto delta = time_point - time.Started();
 
-    resume_list_.push_back({time_point, coroutine});
+    auto node = ResumeRequest<Runtime>{
+        .time_point = time_point,
+        .coroutine = coroutine,
+    };
+
+    resume_list_lifo_.Push(node);
   }
 
   //* Root context
   [[noreturn]] void Run() {
     while (true) {
-      for (auto const& coroutine : coroutines_) {
-        if (coroutine.done()) {
-          coroutines_.remove(coroutine);
-        }
-      }
-
       time.Tick();
       ProcessResumeList();
     }
@@ -88,9 +102,8 @@ class Loop {
     thread.SetThreadName("Loop-Debug");
     thread.Start([this]() {
       while (true) {
-        logger.Info("Elapsed: %d, Now: %d, resume_list: %d entries",
-                    time.ElapsedTime().count(),
-                    time.Now().time_since_epoch().count(), resume_list_.size());
+        logger.Info("Elapsed: %d, Now: %d", time.ElapsedTime().count(),
+                    time.Now().time_since_epoch().count());
 
         robotics::system::SleepFor(1s);
       }
