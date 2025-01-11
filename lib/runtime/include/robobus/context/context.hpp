@@ -46,8 +46,9 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
     return runtime::Sleep(GetLoop(), duration);
   }
 
-  auto GetDebugInfo(std::string const& tag) -> debug::DebugInfo<Runtime> {
-    return debug::DebugInfo<Runtime>(*this, ContextId() + "." + tag);
+  template <internal::StringLiteral kName>
+  auto GetDebugInfo() {
+    return debug::DebugInfo<Runtime, ConcatPath<kPath, kName>>();
   }
 
   auto& Logger() {
