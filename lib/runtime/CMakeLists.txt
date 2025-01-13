@@ -7,5 +7,14 @@ target_include_directories(robobus-runtime INTERFACE
 target_link_libraries(robobus-runtime INTERFACE
     syoch-robotics-common
     syoch-robotics-logger
-    syoch-robotics-thread
 )
+
+if (NON_THREAD)
+    target_compile_definitions(robobus-runtime INTERFACE
+        NON_THREAD=1
+    )
+else()
+    target_link_libraries(robobus-runtime INTERFACE
+        syoch-robotics-thread
+    )
+endif()

@@ -5,12 +5,15 @@
 #include <list>
 
 #include <logger/logger.hpp>
-#include <robotics/thread/thread.hpp>
 #include <robotics/utils/linked_list_node.hpp>
 #include <robotics/utils/no_mutex_lifo.hpp>
 
 #include "robobus/runtime/runtime_impls.hpp"
 #include "time_context.hpp"
+
+#if !defined(NON_THREAD)
+#include <robotics/system/thread.hpp>
+#endif
 
 namespace robobus::runtime {
 
@@ -93,6 +96,7 @@ class Loop {
     }
   }
 
+#if !defined(NON_THREAD)
   void LaunchDebugThread() {
     using namespace std::chrono_literals;
     static robotics::logger::Logger logger{"debug.loop.robobus",
@@ -109,5 +113,6 @@ class Loop {
       }
     });
   }
+#endif
 };
 }  // namespace robobus::runtime
