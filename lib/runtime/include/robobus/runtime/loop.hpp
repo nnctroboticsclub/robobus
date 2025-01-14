@@ -1,8 +1,6 @@
 #pragma once
 
-#include <chrono>
 #include <coroutine>
-#include <list>
 
 #include <logger/logger.hpp>
 #include <robotics/utils/linked_list_node.hpp>
@@ -12,6 +10,7 @@
 #include "time_context.hpp"
 
 #if !defined(NON_THREAD)
+#include <chrono>
 #include <robotics/system/thread.hpp>
 #endif
 
@@ -33,8 +32,11 @@ class Loop {
 
  private:
   void ProcessResumeList() {
-    auto minimum_grace = Runtime::Clock::duration::max();
     const auto now = time.Now();
+
+    if (resume_list_lifo_.Empty()) {
+      printf("There is no coroutine in waiting list\n");
+    }
 
     const size_t it_max = resume_list_lifo_.Size();
     for (size_t i = 0; i < it_max && !resume_list_lifo_.Empty(); i++) {
@@ -45,17 +47,12 @@ class Loop {
 
       auto grace = c_time - now;
 
-      if (0 < grace.count() && grace < minimum_grace) {
-        minimum_grace = grace;
-      }
-
-      if (c_time <= now) {
-        coro.resume();
-
-        continue;
-      } else {
+      if (c_time > now) {
         resume_list_lifo_.Push(ptr);
+        continue;
       }
+
+      coro.resume();
     }
   }
 
