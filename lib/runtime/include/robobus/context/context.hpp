@@ -23,8 +23,8 @@ constexpr auto ConcatPath = parent_path + '.' + tag;
 template <runtime::RuntimeImpl Runtime, internal::StringLiteral kPath>
 class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
  private:
-  RootContext<Runtime>* root_ctx_;
-  robotics::logger::Logger* logger_;
+  RootContext<Runtime>* root_ctx_ = nullptr;
+  robotics::logger::Logger* logger_ = nullptr;
 
  public:
   explicit Context(RootContext<Runtime>* root) : root_ctx_(root) {}
