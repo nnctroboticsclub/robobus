@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <robobus/internal/signal.hpp>
-#include "./cstream.hpp"
+#include "cstream.hpp"
 
 namespace robobus::network::internal::cstream_can {
 using ::robobus::internal::SignalRx;

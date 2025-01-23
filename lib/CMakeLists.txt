@@ -5,8 +5,9 @@ add_library(robobus-dummy STATIC
     source/dummy.cpp
 )
 
-target_link_libraries(robobus-dummy
+target_link_libraries(robobus-dummy PRIVATE
     syoch-robotics-common
+    syoch-robotics-thread
     robobus-bus
     robobus-runtime
 )

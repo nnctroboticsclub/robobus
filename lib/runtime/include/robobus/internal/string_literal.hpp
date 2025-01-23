@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
+#include <cstring>
+
 namespace robobus::internal {
 template <size_t N>
 struct StringLiteral {
@@ -14,27 +17,23 @@ struct StringLiteral {
     data[N] = '\0';
   }
 
+  constexpr StringLiteral() : data() {}
+
   template <size_t M>
-  StringLiteral<N + M> operator+(const StringLiteral<M>& rhs) const {
-    char new_data[N + M + 1];
-    for (size_t i = 0; i < N; ++i) {
-      new_data[i] = data[i];
-    }
-    for (size_t i = 0; i < M; ++i) {
-      new_data[N + i] = rhs.data[i];
-    }
-    new_data[N + M] = '\0';
-    return StringLiteral<N + M>(new_data);
+  constexpr StringLiteral<N + M> operator+(
+      const StringLiteral<M>& other) const {
+    StringLiteral<N + M> result;
+    std::copy(data, data + N, result.data);
+    std::copy(other.data, other.data + M + 1, result.data + N);
+    return result;
   }
 
-  StringLiteral<N + 1> operator+(char ch) {
-    char new_data[N + 2];
-    for (size_t i = 0; i < N; ++i) {
-      new_data[i] = data[i];
-    }
-    new_data[N] = ch;
-    new_data[N + 1] = '\0';
-    return StringLiteral<N + 1>(new_data);
+  constexpr StringLiteral<N + 1> operator+(const char ch) const {
+    StringLiteral<N + 1> result{};
+    std::copy(data, data + N, result.data);
+    result.data[N] = ch;
+    result.data[N + 1] = '\0';
+    return result;
   }
 };
 

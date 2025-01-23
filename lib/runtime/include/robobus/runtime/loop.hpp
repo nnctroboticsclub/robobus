@@ -11,7 +11,7 @@
 
 #if !defined(NON_THREAD)
 #include <chrono>
-#include <robotics/system/thread.hpp>
+#include <robotics/thread/thread.hpp>
 #endif
 
 namespace robobus::runtime {
