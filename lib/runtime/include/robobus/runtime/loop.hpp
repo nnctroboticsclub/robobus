@@ -25,7 +25,7 @@ struct ResumeRequest {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop {
-  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 5> resume_list_lifo_;
+  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 10> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
