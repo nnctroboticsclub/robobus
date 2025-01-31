@@ -51,7 +51,7 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
     return debug::DebugInfo<Runtime, ConcatPath<kPath, kName>>();
   }
 
-  auto& Logger() {
+  robotics::logger::Logger& Logger() {
     if (!logger_) {
       auto cid_cstr = new char[decltype(kPath)::size + 1];
       std::strcpy(cid_cstr, kPath.data);
