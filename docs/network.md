@@ -3,17 +3,15 @@
 | Character | Bitwidth | Desc                       |
 | :-------- | -------- | :------------------------- |
 | d/D       | 10b      | Device ID                  |
-| p         | 20b      | P2P Pipe ID                |
-| s         | 11b      | Session ID                 |
-| c         | 1b       | Data/Ctrl Marker           |
-| w         | 1b       | Direction(P2H, H2P) Marker |
 
-| Type             |   3   |   8   |   6   |   2   | ::display()     |
-| ---------------- | :---: | :---: | :---: | :---: | --------------- |
-| Control transfer |   0   |  d1   |   0   |   c   | {d1} <=> mother |
-| Raw P2P          |   1   |  d1   |  d2   |       | {d2} ==> {d1}   |
-| P2P              |   2   |  p1   |       |   c   | @{p1}           |
-| Multicast        |   3   |  s1   |  d1   |       | {d1} ==> #{s1}  |
+| Type             |   3   |   8   |   6   |   2   | ::display()              |
+| ---------------- | :---: | :---: | :---: | :---: | ------------------------ |
+| Pri Interface Ch |   0   |   i   |  d1   |  d2   | {d1} ==> {d2} #{i} (Pri) |
+| Specific Channel |   1   |  41   |  xx   |       | rf transmit              |
+| Specific Channel |   1   |  42   |  xx   |       | rf receive               |
+| Sub Interface Ch |  2,3  |   i   |  d1   |  d2   | {d1} ==> {d2} #{i} (Sub) |
+
+## Interface
 
 ## Control Transfer
 
@@ -25,6 +23,7 @@
 | kServerCtrl | 1    |
 | kClientData | 2    |
 | kClientCtrl | 3    |
+
 ### Control Pipe
 
 | byte | desc     |
