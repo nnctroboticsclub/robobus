@@ -31,7 +31,7 @@ coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
       memcpy(command_buf, line.c_str(), line.size());
     }
   };
-  korobo2025d::console::Interpreter<Handler> input;
+  robobus::console::Interpreter<Handler> input;
 
   auto& bus = Bus::GetInstance();
 

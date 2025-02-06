@@ -2,9 +2,9 @@
 
 #include <cstring>
 
-#include <korobo2025d/console/interpreter.hpp>
-
 #include <robotics/utils/singleton.hpp>
+
+#include <robobus/console/interpreter.hpp>
 
 #include "entry.hpp"
 #include "entry_iteratable.hpp"
