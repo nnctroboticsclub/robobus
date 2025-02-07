@@ -78,19 +78,7 @@ class LogMonitor {
 
     void Log(robotics::logger::core::Level level, const char* tag,
              const char* msg) override {
-      std::string tag_str;
-      tag_str.reserve(strlen(tag));
-      for (size_t i = 0; tag[i] != '\0'; i++) {
-        tag_str.push_back(tag[i]);
-      }
-
-      std::string msg_str;
-      msg_str.reserve(strlen(msg));
-      for (size_t i = 0; msg[i] != '\0'; i++) {
-        msg_str.push_back(msg[i]);
-      }
-
-      monitor_.AddLine({level, tag_str, msg_str});
+      monitor_.AddLine({level, tag, msg});
     }
   };
 };
