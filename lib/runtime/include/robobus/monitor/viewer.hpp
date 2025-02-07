@@ -98,7 +98,7 @@ coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
       input.HandleInput(*r);
     }
 
-    co_await ctx.Sleep(20ms);
+    co_await ctx.Sleep(50ms);
   }
 }
 }  // namespace robobus::monitor
