@@ -6,6 +6,7 @@
 #include <robotics/utils/linked_list_node.hpp>
 #include <robotics/utils/no_mutex_lifo.hpp>
 
+#include "robobus/internal/sematicses.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 #include "time_context.hpp"
 
@@ -24,7 +25,7 @@ struct ResumeRequest {
 
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
-class Loop {
+class Loop : public internal::NonCopyable<Loop<Runtime>> {
   robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 20> resume_list_lifo_;
 
  public:
@@ -59,6 +60,10 @@ class Loop {
  public:
   Loop(Loop const&) = delete;
   Loop& operator=(Loop const&) = delete;
+
+  Loop(Loop&& other) noexcept
+      : resume_list_lifo_(std::move(other.resume_list_lifo_)),
+        time(std::move(other.time)) {}
 
   Loop() {
     while (!resume_list_lifo_.Full()) {
