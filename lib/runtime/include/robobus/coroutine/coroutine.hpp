@@ -1,6 +1,7 @@
 #pragma once
 
 #include <coroutine>
+#include "coroutine_awaiter.hpp"
 #include "promise.hpp"
 
 namespace robobus::coroutine {
@@ -23,3 +24,7 @@ struct Coroutine {
 };
 
 }  // namespace robobus::coroutine
+
+namespace robobus {
+using coroutine::Coroutine;
+}

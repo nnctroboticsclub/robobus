@@ -1,10 +1,9 @@
 #pragma once
 
 #include <coroutine>
-#include <optional>
-#include <type_traits>
-#include <vector>
 #include <functional>
+#include <optional>
+#include <vector>
 
 namespace robobus::coroutine {
 //* Forward declaration
@@ -19,7 +18,7 @@ template <typename ReturnType>
 class BasePromise {
  protected:
   void Return() const {
-    for (auto &callback : on_return_callbacks) {
+    for (auto& callback : on_return_callbacks) {
       callback();
     }
   }
@@ -29,8 +28,8 @@ class BasePromise {
     on_return_callbacks.emplace_back(callback);
   }
 
-  operator Promise<ReturnType> &() {
-    return *static_cast<Promise<ReturnType> *>(this);
+  operator Promise<ReturnType>&() {
+    return *static_cast<Promise<ReturnType>*>(this);
   }
 
  public:

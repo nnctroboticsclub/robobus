@@ -1,7 +1,6 @@
 #pragma once
 
 #include <coroutine>
-#include <type_traits>
 
 #include "promise.hpp"
 
@@ -13,7 +12,7 @@ struct CoroutineAwaiter;
 //* CoroutineAwaiter
 template <std::move_constructible ReturnType>
 struct CoroutineAwaiter<ReturnType> {
-  explicit CoroutineAwaiter(Promise<ReturnType> &promise) : promise(promise) {}
+  explicit CoroutineAwaiter(Promise<ReturnType>& promise) : promise(promise) {}
 
   bool await_ready() const { return (bool)promise.get_return_value(); }
   void await_suspend(std::coroutine_handle<> handle) {
@@ -28,12 +27,12 @@ struct CoroutineAwaiter<ReturnType> {
   }
 
  private:
-  Promise<ReturnType> &promise;
+  Promise<ReturnType>& promise;
 };
 
 template <>
 struct CoroutineAwaiter<void> {
-  explicit CoroutineAwaiter(Promise<void> &promise) : promise(promise) {}
+  explicit CoroutineAwaiter(Promise<void>& promise) : promise(promise) {}
 
   bool await_ready() const { return promise.get_return_value(); }
   void await_suspend(std::coroutine_handle<> handle) {
@@ -42,6 +41,6 @@ struct CoroutineAwaiter<void> {
   auto await_resume() const { return; }
 
  private:
-  Promise<void> &promise;
+  Promise<void>& promise;
 };
 }  // namespace robobus::coroutine
