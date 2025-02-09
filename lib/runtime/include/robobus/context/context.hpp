@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstring>
-#include <optional>
 
 #include <logger/logger.hpp>
 
@@ -27,6 +26,12 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
   robotics::logger::Logger* logger_ = nullptr;
 
  public:
+  Context(Context<Runtime, kPath>&& other) noexcept
+      : root_ctx_(other.root_ctx_), logger_(other.logger_) {
+    other.root_ctx_ = nullptr;
+    other.logger_ = nullptr;
+  }
+
   explicit Context(RootContext<Runtime>* root) : root_ctx_(root) {}
 
   ~Context() = default;
@@ -64,3 +69,7 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
 };
 
 }  // namespace robobus::context
+
+namespace robobus {
+using context::Context;
+}  // namespace robobus
