@@ -1,10 +1,8 @@
 #pragma once
 
-#include <memory>
-
-#include "../debug/debug_adapter.hpp"
 #include "../runtime/loop.hpp"
 #include "robobus/context/context.hpp"
+#include "robobus/internal/sematicses.hpp"
 #include "robobus/internal/string_literal.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 
@@ -15,11 +13,16 @@ class Context;
 
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <runtime::RuntimeImpl Runtime>
-class RootContext {
+class RootContext : public internal::NonCopyable<RootContext<Runtime>> {
  private:
   runtime::Loop<Runtime> loop_{};
 
  public:
+  RootContext(RootContext<Runtime>&& other) noexcept
+      : loop_(std::move(other.loop_)) {}
+
+  RootContext() = default;
+
   [[noreturn]] auto Run() -> void { loop_.Run(); }
 
   auto GetLoop() -> runtime::Loop<Runtime>& { return loop_; }
