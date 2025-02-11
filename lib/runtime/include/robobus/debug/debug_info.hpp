@@ -14,8 +14,14 @@ namespace robobus::debug {
 
 template <runtime::RuntimeImpl Runtime, internal::StringLiteral kTag>
 class DebugInfo {
+  std::string previous_message_;
+
  public:
   auto Message(std::string_view message) -> void {
+    if (previous_message_ == message) {
+      return;
+    }
+    previous_message_ = message;
     Runtime::DebugAdapter::Message(kTag.data, message);
   }
 };

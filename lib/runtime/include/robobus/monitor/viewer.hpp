@@ -10,18 +10,18 @@
 
 namespace robobus::monitor {
 
-/* template <typename T>
+template <typename T>
 concept ViewerHandler = requires {
   { T::ReadChar() } -> std::same_as<std::optional<char>>;
-}; */
+};
 
 //! Occupies stdout
-template </* ViewerHandler vHandler, */ robobus::runtime::RuntimeImpl Runtime,
+template <ViewerHandler vHandler, robobus::runtime::RuntimeImpl Runtime,
           internal::StringLiteral kPath>
 coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
   using namespace std::chrono_literals;
 
-  /* static char command_buf[256] = {0};
+  static char command_buf[256] = {0};
 
   struct Handler {
     static void HandleInputLine(std::string line) {
@@ -29,7 +29,7 @@ coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
       memcpy(command_buf, line.c_str(), line.size());
     }
   };
-  static robobus::console::Interpreter<Handler> input; */
+  static robobus::console::Interpreter<Handler> input;
 
   auto& bus = Bus::GetInstance();
 
@@ -39,7 +39,7 @@ coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
   while (true) {
     printf("\033[;H");
 
-    /* printf("Cmd: %s\x1b[K\n", command_buf); */
+    printf("Cmd: %s\x1b[K\n", command_buf);
 
     printf("\x1b[1;34m# Monitor\x1b[m\x1b[K\n");
     for (auto const& entry : bus.Entries()) {
@@ -89,12 +89,12 @@ coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
       printf("\x1b[K\n");
     }
 
-    /* input.Show();
+    input.Show();
 
     std::optional<char> r = vHandler::ReadChar();
     if (r.has_value()) {
       input.HandleInput(*r);
-    } */
+    }
 
     co_await ctx.Sleep(50ms);
   }

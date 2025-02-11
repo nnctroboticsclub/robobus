@@ -52,7 +52,7 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
   }
 
   template <internal::StringLiteral kName>
-  auto GetDebugInfo() {
+  auto GetDebugInfo() -> debug::DebugInfo<Runtime, ConcatPath<kPath, kName>> {
     return debug::DebugInfo<Runtime, ConcatPath<kPath, kName>>();
   }
 
