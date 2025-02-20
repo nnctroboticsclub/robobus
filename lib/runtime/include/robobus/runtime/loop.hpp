@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+
 #include <coroutine>
 
 #include <logger/logger.hpp>
