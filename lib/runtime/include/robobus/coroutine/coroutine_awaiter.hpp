@@ -15,9 +15,11 @@ struct CoroutineAwaiter<ReturnType> {
   explicit CoroutineAwaiter(Promise<ReturnType>& promise) : promise(promise) {}
 
   bool await_ready() const { return (bool)promise.get_return_value(); }
+
   void await_suspend(std::coroutine_handle<> handle) {
     promise.AddOnReturnCallback([handle]() { handle.resume(); });
   }
+
   auto await_resume() const {
     if (promise.get_return_value()) {
       return std::move(promise.get_return_value().value());
