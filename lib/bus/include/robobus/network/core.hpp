@@ -25,7 +25,6 @@ class RobobusNetwork {
   void HandleP2PMessage(P2PMessageID msg_id,
                         std::vector<uint8_t> const& data) const {
     if (!device_self_.IsToSelf(msg_id)) {
-      logger.Error("Message not to self");
       return;
     }
 
