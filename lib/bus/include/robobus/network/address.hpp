@@ -5,9 +5,10 @@ namespace robobus::network {
 /// @brief アドレスを表すクラス
 /// @details いくつかの特殊なアドレスが定義されている．それらのアドレスについては特別に静的関数が用意されている．
 class Address {
-  uint8_t id_;
+  uint8_t id_ = 0;
 
  public:
+  Address() = default;
   explicit Address(uint8_t id) : id_(id) {}
 
   [[nodiscard]] auto Get() const -> uint8_t { return id_; }

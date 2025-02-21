@@ -4,6 +4,12 @@
 #include "device_id_manager.hpp"
 #include "interface/interface.hpp"
 #include "interface/interface_summary.hpp"
+#include "robobus/context/context.hpp"
+#include "robobus/coroutine/generic_awaiter.hpp"
+#include "robobus/internal/string_literal.hpp"
+#include "robobus/network/address.hpp"
+#include "robobus/runtime/lazy_resumer.hpp"
+#include "robobus/runtime/runtime_impls.hpp"
 
 #include <robotics/random/random.hpp>
 
@@ -80,6 +86,8 @@ class EnumerateInterface : public IInterface,
 
   std::string creator_;
   std::string name_;
+
+  std::optional<coroutine::IAwaiterRef<Address>> on_enumerate_finished_;
 
   void SendDevice(Address dest, DeviceSummary const& summary) const {
     for (auto& intf : summary.interfaces) {
@@ -232,6 +240,9 @@ class EnumerateInterface : public IInterface,
       this->device.TransitionToInitialized(new_device_id);
 
       logger.Info("Device initialized with id %d", new_device_id.Get());
+      if (on_enumerate_finished_.has_value()) {
+        (*on_enumerate_finished_)->Resume(new_device_id);
+      }
     }
 
     switch (command) {
@@ -295,6 +306,14 @@ class EnumerateInterface : public IInterface,
         .name = name,
         .interfaces = interfaces,
     };
+  }
+
+  template <runtime::RuntimeImpl Runtime, internal::StringLiteral kPath>
+  Coroutine<Address> AwaitEnumerated(context::Context<Runtime, kPath>& ctx) {
+    using Awaiter = runtime::LazyResumerAwaiter<Address, Runtime>;
+
+    on_enumerate_finished_ = std::make_unique<Awaiter>(ctx.GetLoop());
+    co_return co_await** on_enumerate_finished_;
   }
 
   void FindEnumeratedDevices() const { Send(Address::Broadcast(), {0x00}); }

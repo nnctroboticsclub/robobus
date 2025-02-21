@@ -12,8 +12,6 @@ class RandomName : public IInterface, public CANTxMixin {
   static inline robotics::logger::Logger logger{"test->robo-bus.random-name",
                                                 "RandomName"};
 
-  using CANTxMixin::Send;
-
   mutable std::string name_;
 
  public:
@@ -34,5 +32,7 @@ class RandomName : public IInterface, public CANTxMixin {
   void HandleRx(Address const&, CANDataType const&) final {
     // RandomName インタフェースは受信したパケットをすべて放棄する．
   }
+
+  using CANTxMixin::Send;
 };
 }  // namespace robobus::network
