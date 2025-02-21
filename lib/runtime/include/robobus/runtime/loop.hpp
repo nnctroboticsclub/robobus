@@ -25,10 +25,16 @@ struct ResumeRequest {
   std::coroutine_handle<> coroutine;
 };
 
+struct InstantResumeRequest {
+  std::coroutine_handle<> coroutine;
+};
+
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
   robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 20> resume_list_lifo_;
+  robotics::utils::NoMutexLIFO<InstantResumeRequest, 20>
+      instant_resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
@@ -59,6 +65,13 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     }
   }
 
+  void ProcessInstantResumeList() {
+    while (!instant_resume_list_lifo_.Empty()) {
+      auto ptr = instant_resume_list_lifo_.Pop();
+      ptr.coroutine.resume();
+    }
+  }
+
  public:
   Loop(Loop const&) = delete;
   Loop& operator=(Loop const&) = delete;
@@ -74,6 +87,14 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
 
     while (!resume_list_lifo_.Empty()) {
       resume_list_lifo_.Pop();
+    }
+
+    while (!instant_resume_list_lifo_.Full()) {
+      instant_resume_list_lifo_.Push(InstantResumeRequest{});
+    }
+
+    while (!instant_resume_list_lifo_.Empty()) {
+      instant_resume_list_lifo_.Pop();
     }
   }
 
@@ -92,11 +113,16 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     resume_list_lifo_.Push(node);
   }
 
+  void ScheduleResumeInstantly(std::coroutine_handle<> coroutine) {
+    instant_resume_list_lifo_.Push(InstantResumeRequest{coroutine});
+  }
+
   //* Root context
   [[noreturn]] void Run() {
     while (true) {
       time.Tick();
       ProcessResumeList();
+      ProcessInstantResumeList();
     }
   }
 
