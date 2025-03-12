@@ -16,7 +16,7 @@ namespace robobus::coroutine {
 template <typename T>
 class IAwaiter {
  public:
-  ~IAwaiter() = default;
+  virtual ~IAwaiter() = default;
 
   /// @brief Awaiter を Resume するための関数
   virtual void Resume(T value) = 0;
