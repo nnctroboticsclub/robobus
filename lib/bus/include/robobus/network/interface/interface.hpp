@@ -51,6 +51,14 @@ class InterfaceCANTx {
 
     can_->Send(msg_id.Get(), data);
   }
+
+  /// @brief インタフェースクラスから CAN メッセージを送信するための関数
+  void Send(Address dest, uint8_t remote_port, CANDataType const& data) const {
+    auto msg_id =
+        P2PMessageID::FromParts(device_.GetSelfId(), dest, remote_port);
+
+    can_->Send(msg_id.Get(), data);
+  }
 };
 
 class SyncRxMixin {
@@ -155,6 +163,11 @@ class CANTxMixin {
   /// @brief 指定したアドレスの同じインタフェースへデータを送信する
   void Send(Address dest, CANDataType const& data) const {
     can_tx_.Send(dest, data);
+  }
+
+  /// @brief 指定したアドレスの同じインタフェースへデータを送信する
+  void Send(Address dest, uint8_t remote_port, CANDataType const& data) const {
+    can_tx_.Send(dest, remote_port, data);
   }
 
  public:
