@@ -32,8 +32,8 @@ struct InstantResumeRequest {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
-  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 20> resume_list_lifo_;
-  robotics::utils::NoMutexLIFO<InstantResumeRequest, 20>
+  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 32> resume_list_lifo_;
+  robotics::utils::NoMutexLIFO<InstantResumeRequest, 32>
       instant_resume_list_lifo_;
 
  public:
