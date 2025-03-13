@@ -101,6 +101,10 @@ class Device : public robobus::internal::NonCopyable<Device> {
   //* ユーティリティ
 
   [[nodiscard]] bool IsToSelf(P2PMessageID const& msg_id) const {
+    auto src = msg_id.GetSource();
+    if (src == self_)
+      return false;
+
     auto dst = msg_id.GetDestination();
 
     if (dst == Address::Broadcast())
