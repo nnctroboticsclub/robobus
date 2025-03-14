@@ -101,7 +101,7 @@ class SyncRxMixin {
     MessageAwaiter awaiter;
   };
 
-  robotics::utils::LinkedList<WaitQueue, 16> wait_queue_;
+  robotics::utils::LinkedList<WaitQueue, 4> wait_queue_;
 
  protected:
   virtual void HandleRxAsync(Address const& from, CANDataType const& data) = 0;
@@ -149,6 +149,7 @@ class SyncRxMixin {
   }
 
  public:
+  SyncRxMixin() { wait_queue_.Clear(); }
   virtual ~SyncRxMixin() = default;
 };
 
