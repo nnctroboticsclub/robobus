@@ -4,15 +4,12 @@
 #include <vector>
 
 #include "../interface/interface_summary.hpp"
+#include "./device_meta.hpp"
 
 namespace robobus::network {
 /// @brief デバイスの概要
 struct DeviceSummary {
-  /// @brief デバイスの作成者
-  std::string creator;
-
-  /// @brief デバイスの名前
-  std::string name;
+  DeviceMeta meta;
 
   /// @brief デバイスが持つインタフェースのリスト
   std::vector<InterfaceSummary> interfaces;

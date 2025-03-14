@@ -2,16 +2,13 @@
 
 #include <robotics/random/random.hpp>
 
-#include "interface/interface.hpp"
+#include <robobus/network/interface/interface.hpp>
 
-namespace robobus::network {
+namespace robobus::network::interface::random_name {
 /// @brief RandomName インタフェース
 /// @details RandomName インタフェースはランダムな名前を持つ空のインタフェースである．
 /// このインタフェースの目的はデバッグ目的であると同時に，新しくインタフェースを作成するときのテンプレートでもある．
-class RandomName : public IInterface, public CANTxMixin {
-  static inline robotics::logger::Logger logger{"test->robo-bus.random-name",
-                                                "RandomName"};
-
+class RandomNameInterface : public IInterface, public CANTxMixin {
   mutable std::string name_;
 
  public:
@@ -35,4 +32,8 @@ class RandomName : public IInterface, public CANTxMixin {
 
   using CANTxMixin::Send;
 };
-}  // namespace robobus::network
+}  // namespace robobus::network::interface::random_name
+
+namespace robobus::network {
+using interface::random_name::RandomNameInterface;
+}

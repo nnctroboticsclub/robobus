@@ -1,22 +1,20 @@
 #pragma once
 
-#include "device/device_summary.hpp"
-#include "device_id_manager.hpp"
-#include "interface/interface.hpp"
-#include "interface/interface_summary.hpp"
-#include "robobus/context/context.hpp"
-#include "robobus/coroutine/awaitable.hpp"
-#include "robobus/coroutine/coroutine.hpp"
-#include "robobus/coroutine/generic_awaiter.hpp"
-#include "robobus/internal/string_literal.hpp"
-#include "robobus/network/address.hpp"
-#include "robobus/runtime/lazy_resumer.hpp"
-#include "robobus/runtime/loop.hpp"
-#include "robobus/runtime/runtime_impls.hpp"
+#include <robobus/context/context.hpp>
+#include <robobus/coroutine/awaitable.hpp>
+#include <robobus/coroutine/coroutine.hpp>
+#include <robobus/coroutine/generic_awaiter.hpp>
+#include <robobus/internal/string_literal.hpp>
+#include <robobus/network/address.hpp>
+#include <robobus/network/device/device_summary.hpp>
+#include <robobus/network/device_id_manager.hpp>
+#include <robobus/network/interface/interface.hpp>
+#include <robobus/network/interface/interface_summary.hpp>
+#include <robobus/runtime/lazy_resumer.hpp>
+#include <robobus/runtime/loop.hpp>
+#include <robobus/runtime/runtime_impls.hpp>
 
-#include <concepts>
 #include <robotics/random/random.hpp>
-#include <utility>
 
 namespace robobus::network::interface::enumerate {
 
@@ -114,8 +112,8 @@ class EnumerateInterface : public IInterface,
     Send(dest, {
                    static_cast<uint8_t>(Opcode::kDevice),  //
                    static_cast<uint8_t>(summary.interfaces.size()),
-                   collected_strings_.Encode(summary.creator),
-                   collected_strings_.Encode(summary.name),
+                   collected_strings_.Encode(summary.meta.creator),
+                   collected_strings_.Encode(summary.meta.name),
                });
   }
 
@@ -239,8 +237,11 @@ class EnumerateInterface : public IInterface,
     auto creator = co_await QueryStr(dev, data[2]);
     auto name = co_await QueryStr(dev, data[3]);
     co_return DeviceSummary{
-        .creator = creator,
-        .name = name,
+        .meta =
+            DeviceMeta{
+                .creator = creator,
+                .name = name,
+            },
         .interfaces = interfaces,
     };
   }
@@ -294,8 +295,11 @@ class EnumerateInterface : public IInterface,
     switch (command) {
       case kQueryDevice: {
         DeviceSummary summary{
-            .creator = creator_,
-            .name = name_,
+            .meta =
+                DeviceMeta{
+                    .creator = creator_,
+                    .name = name_,
+                },
             .interfaces = {},
         };
 
