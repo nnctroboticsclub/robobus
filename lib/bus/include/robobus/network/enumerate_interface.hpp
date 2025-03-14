@@ -5,15 +5,20 @@
 #include "interface/interface.hpp"
 #include "interface/interface_summary.hpp"
 #include "robobus/context/context.hpp"
+#include "robobus/coroutine/awaitable.hpp"
+#include "robobus/coroutine/coroutine.hpp"
 #include "robobus/coroutine/generic_awaiter.hpp"
 #include "robobus/internal/string_literal.hpp"
 #include "robobus/network/address.hpp"
 #include "robobus/runtime/lazy_resumer.hpp"
+#include "robobus/runtime/loop.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 
+#include <concepts>
 #include <robotics/random/random.hpp>
+#include <utility>
 
-namespace robobus::network {
+namespace robobus::network::interface::enumerate {
 
 template <typename T>
 class CollectingEncoder {
@@ -42,9 +47,34 @@ class CollectingEncoder {
   }
 };
 
+enum class Opcode : uint8_t {
+  // 3-way handshake
+  kScanUnenumerated = 0x00,
+  kAdvertise = 0x01,
+  kAssignID = 0x02,
+
+  // Device information
+  kQueryDevice = 0x10,
+  kDevice = 0x11,
+
+  // Interface information
+  kQueryInterface = 0x12,
+  kInterface = 0x13,
+
+  // String information
+  kQueryString = 0x14,
+  kStringResponse = 0x15,
+};
+
+template <typename T>
+concept Handler = requires(Address addr) {
+  T::OnDeviceFound(addr);
+};
+
 /// @brief Enumerate インタフェース
 /// @details Enumerate インタフェースは，デバイスの列挙機能及び，デバイスのメタデータの取得機能を提供する．
 /// また， Advertisement Tag を用いる唯一のインタフェースである．
+template <Handler HandlerType>
 class EnumerateInterface : public IInterface,
                            public CANTxMixin,
                            public SyncRxMixin {
@@ -55,25 +85,6 @@ class EnumerateInterface : public IInterface,
   using SyncRxMixin::ReceiveAwait;
 
   DeviceIDManager device_id_manager_;
-
-  enum class Opcode : uint8_t {
-    // 3-way handshake
-    kScanUnenumerated = 0x00,
-    kAdvertise = 0x01,
-    kAssignID = 0x02,
-
-    // Device information
-    kQueryDevice = 0x10,
-    kDevice = 0x11,
-
-    // Interface information
-    kQueryInterface = 0x12,
-    kInterface = 0x13,
-
-    // String information
-    kQueryString = 0x14,
-    kStringResponse = 0x15,
-  };
 
   /// @brief 送信用に収集されたテキストのリスト
   CollectingEncoder<std::string> collected_strings_;
@@ -150,7 +161,6 @@ class EnumerateInterface : public IInterface,
   }
 
   Coroutine<std::string> QueryStr(Address dev, uint8_t str) {
-    using enum Opcode;
 
     // logger.Debug("\x1b[4;33mQuerying string %d from %d\x1b[m", str, dev.Get());
 
@@ -235,6 +245,7 @@ class EnumerateInterface : public IInterface,
 
       logger.Info("Assigning device id %d for tag %d", new_device_id.Get(),
                   from.Get());
+      HandlerType::OnDeviceFound(new_device_id);
     } else if (command == kAssignID && this->device.IsIdWaiting()) {
       auto new_device_id = Address(data[1]);
       this->device.TransitionToInitialized(new_device_id);
@@ -308,14 +319,18 @@ class EnumerateInterface : public IInterface,
     };
   }
 
-  template <runtime::RuntimeImpl Runtime, internal::StringLiteral kPath>
-  Coroutine<Address> AwaitEnumerated(context::Context<Runtime, kPath>& ctx) {
+  template <runtime::RuntimeImpl Runtime>
+  Coroutine<Address> AwaitEnumerated(runtime::Loop<Runtime>& loop) {
     using Awaiter = runtime::LazyResumerAwaiter<Address, Runtime>;
 
-    on_enumerate_finished_ = std::make_unique<Awaiter>(ctx.GetLoop());
+    on_enumerate_finished_ = std::make_unique<Awaiter>(loop);
     co_return co_await** on_enumerate_finished_;
   }
 
   void FindEnumeratedDevices() const { Send(Address::Broadcast(), {0x00}); }
 };
-}  // namespace robobus::network
+}  // namespace robobus::network::interface::enumerate
+
+namespace robobus::network {
+using interface::enumerate::EnumerateInterface;
+}
