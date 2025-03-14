@@ -66,15 +66,14 @@ enum class Opcode : uint8_t {
   kStringResponse = 0x15,
 };
 
-template <typename T>
-concept Handler = requires(Address addr) {
-  T::OnDeviceFound(addr);
+struct IEnumHandler {
+  virtual ~IEnumHandler() = default;
+  virtual Coroutine<void> OnDeviceFound(Address const& device_address) = 0;
 };
 
 /// @brief Enumerate インタフェース
 /// @details Enumerate インタフェースは，デバイスの列挙機能及び，デバイスのメタデータの取得機能を提供する．
 /// また， Advertisement Tag を用いる唯一のインタフェースである．
-template <Handler HandlerType>
 class EnumerateInterface : public IInterface,
                            public CANTxMixin,
                            public SyncRxMixin {
@@ -99,6 +98,9 @@ class EnumerateInterface : public IInterface,
   std::string name_;
 
   std::optional<coroutine::IAwaiterRef<Address>> on_enumerate_finished_;
+
+  /// @brief 上位層のハンドラ
+  std::shared_ptr<IEnumHandler> handler;
 
   void SendDevice(Address dest, DeviceSummary const& summary) const {
     for (auto& intf : summary.interfaces) {
@@ -215,7 +217,9 @@ class EnumerateInterface : public IInterface,
   }
 
  public:
-  using CANTxMixin::CANTxMixin;
+  EnumerateInterface(InterfaceCANTx can_tx, Device& device_,
+                     std::shared_ptr<IEnumHandler> handler)
+      : CANTxMixin(can_tx, device_), handler(handler) {}
 
   [[nodiscard]] uint8_t GetID() const final { return 0x00; }
   [[nodiscard]] std::string GetName() const final { return "Enumerate"; }
@@ -245,7 +249,7 @@ class EnumerateInterface : public IInterface,
 
       logger.Info("Assigning device id %d for tag %d", new_device_id.Get(),
                   from.Get());
-      HandlerType::OnDeviceFound(new_device_id);
+      handler->OnDeviceFound(new_device_id);
     } else if (command == kAssignID && this->device.IsIdWaiting()) {
       auto new_device_id = Address(data[1]);
       this->device.TransitionToInitialized(new_device_id);
@@ -333,4 +337,5 @@ class EnumerateInterface : public IInterface,
 
 namespace robobus::network {
 using interface::enumerate::EnumerateInterface;
-}
+using EnumerateHandler = interface::enumerate::IEnumHandler;
+}  // namespace robobus::network
