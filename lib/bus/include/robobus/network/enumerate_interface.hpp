@@ -244,7 +244,7 @@ class EnumerateInterface : public IInterface,
  public:
   EnumerateInterface(InterfaceCANTx can_tx, Device& device_,
                      std::shared_ptr<IEnumHandler> handler)
-      : CANTxMixin(can_tx, device_), handler(handler) {}
+      : CANTxMixin(can_tx, device_), SyncRxMixin(), handler(handler) {}
 
   [[nodiscard]] uint8_t GetID() const final { return 0x00; }
   [[nodiscard]] std::string GetName() const final { return "Enumerate"; }
