@@ -68,7 +68,7 @@ enum class Opcode : uint8_t {
 
 struct IEnumHandler {
   virtual ~IEnumHandler() = default;
-  virtual Coroutine<void> OnDeviceFound(Address const& device_address) = 0;
+  virtual void OnDeviceFound(Address const& device_address) = 0;
 };
 
 /// @brief Enumerate インタフェース
@@ -163,7 +163,6 @@ class EnumerateInterface : public IInterface,
   }
 
   Coroutine<std::string> QueryStr(Address dev, uint8_t str) {
-
     // logger.Debug("\x1b[4;33mQuerying string %d from %d\x1b[m", str, dev.Get());
 
     //* Acquire the string length
@@ -178,13 +177,11 @@ class EnumerateInterface : public IInterface,
 
     // logger.Debug("\x1b[33mString %d has length %d\x1b[m", str, length);
 
-    //* Calculate some
+    //* Calculate chunks
     auto num_chunks = (length + 3) / 4;
 
-    auto buffer = std::vector<uint8_t>{};
-    buffer.reserve(length);
-
     //* Acquire the string data
+    auto string = std::string(length, '#');
     for (auto i = 0; i < num_chunks; i++) {
       Send(dev, {static_cast<uint8_t>(Opcode::kQueryString), str,
                  static_cast<unsigned char>(i + 1)});
@@ -192,13 +189,11 @@ class EnumerateInterface : public IInterface,
           co_await ReceiveAwait(static_cast<uint8_t>(Opcode::kStringResponse));
 
       for (size_t j = 3; j < data.size(); j++) {
-        buffer.push_back(data[j]);
+        string[i * 4 + (j - 3)] = data[j];
       }
     }
 
-    auto string = std::string(buffer.begin(), buffer.end());
-    // logger.Debug("\x1b[33mReceived string %d from %d ==> %s\x1b[m", str, dev.Get(), string);
-
+    // logger.Debug("\x1b[33mReceived string %d from %d ==> %s (%p)\x1b[m", str, dev.Get(), string.c_str(), string.c_str());
     co_return string;
   }
 
@@ -209,10 +204,40 @@ class EnumerateInterface : public IInterface,
     auto [dest, data] =
         co_await ReceiveAwait(static_cast<uint8_t>(Opcode::kInterface));
 
+    // logger.Debug("Received Interface%d information from %d", index, dest.Get());
+    // logger.HexDebug(data.data(), data.size());
+
+    auto intf_name = co_await QueryStr(dev, data[4]);
+
     co_return InterfaceSummary{
         .port = data[2],
         .id = data[3],
-        .name = co_await QueryStr(dev, data[4]),
+        .name = intf_name,
+    };
+  }
+
+  Coroutine<DeviceSummary> QueryDevice(Address dev) {
+    using enum Opcode;
+    Send(dev, {static_cast<uint8_t>(Opcode::kQueryDevice)});
+    auto [dest, data] =
+        co_await ReceiveAwait(static_cast<uint8_t>(Opcode::kDevice));
+
+    // logger.Debug("Received device%d information from %d", dev.Get(),
+    //              dest.Get());
+    // logger.HexDebug(data.data(), data.size());
+
+    auto num_interfaces = data[1];
+    auto interfaces = std::vector<InterfaceSummary>{};
+    for (uint8_t index = 0; index < num_interfaces; index++) {
+      auto intf = co_await QueryInterface(dev, index);
+      interfaces.push_back(intf);
+    }
+    auto creator = co_await QueryStr(dev, data[2]);
+    auto name = co_await QueryStr(dev, data[3]);
+    co_return DeviceSummary{
+        .creator = creator,
+        .name = name,
+        .interfaces = interfaces,
     };
   }
 
@@ -297,30 +322,8 @@ class EnumerateInterface : public IInterface,
     }
   }
 
-  Coroutine<DeviceSummary> Query(Address dev) {
-    using enum Opcode;
-
-    Send(dev, {static_cast<uint8_t>(Opcode::kQueryDevice)});
-    auto [dest, data] =
-        co_await ReceiveAwait(static_cast<uint8_t>(Opcode::kDevice));
-
-    // logger.Debug("Received device information from %d", dest.Get());
-    // logger.HexDebug(data.data(), data.size());
-
-    auto num_interfaces = data[1];
-    auto interfaces = std::vector<InterfaceSummary>{};
-    for (uint8_t index = 0; index < num_interfaces; index++) {
-      interfaces.push_back(co_await QueryInterface(dev, index));
-    }
-
-    auto creator = co_await QueryStr(dev, data[2]);
-    auto name = co_await QueryStr(dev, data[3]);
-
-    co_return DeviceSummary{
-        .creator = creator,
-        .name = name,
-        .interfaces = interfaces,
-    };
+  Coroutine<DeviceSummary> inline Query(Address dev) {
+    return QueryDevice(dev);
   }
 
   template <runtime::RuntimeImpl Runtime>
@@ -331,7 +334,10 @@ class EnumerateInterface : public IInterface,
     co_return co_await** on_enumerate_finished_;
   }
 
-  void FindEnumeratedDevices() const { Send(Address::Broadcast(), {0x00}); }
+  void FindEnumeratedDevices() const {
+    Send(Address::Broadcast(),
+         {static_cast<uint8_t>(Opcode::kScanUnenumerated)});
+  }
 };
 }  // namespace robobus::network::interface::enumerate
 
