@@ -3,6 +3,7 @@
 #include <coroutine>
 
 #include "promise.hpp"
+#include "robobus/coroutine/generic_awaiter.hpp"
 
 namespace robobus::coroutine {
 
@@ -45,4 +46,7 @@ struct CoroutineAwaiter<void> {
  private:
   Promise<void>& promise;
 };
+
+static_assert(AwaiterLike<CoroutineAwaiter<void>, void>,
+              "CoroutineAwaiter<void> must be awaiter");
 }  // namespace robobus::coroutine

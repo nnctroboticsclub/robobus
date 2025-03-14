@@ -8,8 +8,11 @@
 /// 　例えば，Runtime によらず任意の Awaiter を扱うことができるので，クラス側で Runtime 情報を持たずに
 /// メゾッド側で任意の Runtime を扱うことができる．
 
+#include <concepts>
 #include <coroutine>
 #include <memory>
+#include <type_traits>
+#include <utility>
 namespace robobus::coroutine {
 /// @brief Dynamic Dispatch 用の Awaiter 純粋仮想クラス
 /// @tparam T Awaiter の戻り値の型
@@ -35,4 +38,16 @@ class IAwaiter {
 
 template <typename T>
 using IAwaiterRef = std::unique_ptr<IAwaiter<T>>;
+
+template <typename T, typename RetT>
+concept AwaiterLike = requires(T t) {
+  { t.await_ready() } -> std::same_as<bool>;
+  {
+    t.await_suspend(std::declval<std::coroutine_handle<>>())
+    } -> std::same_as<void>;
+  { t.await_resume() } -> std::same_as<RetT>;
+};
+
+static_assert(AwaiterLike<IAwaiter<int>, int>,
+              "IAwaiter<int> must be AwaiterLike");
 }  // namespace robobus::coroutine

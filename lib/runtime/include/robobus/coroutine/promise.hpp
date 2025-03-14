@@ -4,6 +4,8 @@
 #include <functional>
 #include <optional>
 #include <vector>
+#include "robobus/coroutine/coroutine.hpp"
+#include "robobus/coroutine/generic_awaiter.hpp"
 
 namespace robobus::coroutine {
 //* Forward declaration
@@ -82,4 +84,28 @@ struct Promise<void> : public BasePromise<void> {
  private:
   bool finished = false;
 };
+
+//* Concept
+
+template <typename T, typename RetT>
+constexpr const bool PromiseLike_v = requires(T t) {
+  { t.initial_suspend() } -> AwaiterLike<RetT>;
+  { t.final_suspend() } -> AwaiterLike<RetT>;
+  t.unhandled_exception();
+
+  { t.return_value() } -> AwaiterLike<RetT>;
+};
+
+template <typename T>
+constexpr const bool PromiseLike_v<T, void> = requires(T t) {
+  { t.initial_suspend() } -> AwaiterLike<void>;
+  { t.final_suspend() } -> AwaiterLike<void>;
+  t.unhandled_exception();
+
+  { t.return_void() } -> AwaiterLike<void>;
+};
+
+template <typename T, typename RetT>
+concept PromiseLike = PromiseLike_v<T, RetT>;
+
 }  // namespace robobus::coroutine
