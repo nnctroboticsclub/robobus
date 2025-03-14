@@ -66,9 +66,13 @@ enum class Opcode : uint8_t {
   kStringResponse = 0x15,
 };
 
+// forward declaration
+class EnumerateInterface;
+
 struct IEnumHandler {
   virtual ~IEnumHandler() = default;
   virtual void OnDeviceFound(Address const& device_address) = 0;
+  virtual void OnAssociated(EnumerateInterface* intf) = 0;
 };
 
 /// @brief Enumerate インタフェース
@@ -244,7 +248,9 @@ class EnumerateInterface : public IInterface,
  public:
   EnumerateInterface(InterfaceCANTx can_tx, Device& device_,
                      std::shared_ptr<IEnumHandler> handler)
-      : CANTxMixin(can_tx, device_), SyncRxMixin(), handler(handler) {}
+      : CANTxMixin(can_tx, device_), SyncRxMixin(), handler(handler) {
+    handler->OnAssociated(this);
+  }
 
   [[nodiscard]] uint8_t GetID() const final { return 0x00; }
   [[nodiscard]] std::string GetName() const final { return "Enumerate"; }
