@@ -14,7 +14,7 @@ if (${NON_THREAD})
         NON_THREAD=1
     )
 else()
-    message(STATUS "Using thread (robobus-runtime) (rr; ${NON_THREAD}) <<< TRACK ME!")
+    message(STATUS "Using thread (robobus-runtime) (rr; ${NON_THREAD}, csp: ${CMAKE_SUB_PROJECT}) <<< TRACK ME!")
     target_compile_definitions(robobus-runtime INTERFACE
         NON_THREAD=0
     )

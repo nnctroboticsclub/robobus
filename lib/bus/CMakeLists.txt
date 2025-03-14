@@ -5,5 +5,7 @@ target_include_directories(robobus-bus INTERFACE
 )
 
 target_link_libraries(robobus-bus INTERFACE
-    syoch-robotics-logger rd16
+    syoch-robotics-common
+    syoch-robotics-logger
+    rd16
 )
