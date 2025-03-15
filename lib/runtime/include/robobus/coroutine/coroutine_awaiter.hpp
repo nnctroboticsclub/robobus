@@ -2,10 +2,13 @@
 
 #include <coroutine>
 
+#include "logger/logger.hpp"
 #include "promise.hpp"
 #include "robobus/coroutine/generic_awaiter.hpp"
 
 namespace robobus::coroutine {
+
+robotics::logger::Logger logger{"coro.rb", "RB/Coro"};
 
 template <typename ReturnType>
 struct CoroutineAwaiter;
@@ -25,7 +28,9 @@ struct CoroutineAwaiter<ReturnType> {
     if (promise.get_return_value()) {
       return std::move(promise.get_return_value().value());
     } else {
-      return ReturnType{};
+      logger.Error("Await_resume was called for not finished promise");
+      while (true)
+        ;
     }
   }
 
