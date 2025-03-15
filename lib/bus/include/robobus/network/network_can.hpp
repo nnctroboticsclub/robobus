@@ -30,11 +30,14 @@ class RobobusOnCAN : public RobobusNetwork {
     can_->Send(msg_id.Get(), data);
   }
 
+  auto GetCANTx(uint8_t port) {
+    return InterfaceCANTx(can_, GET__DEVICE(), port);
+  }
+
   template <typename Intf, typename... Args>
   auto NewInterface(uint8_t port, Args&&... args) {
-    auto interface =
-        std::make_shared<Intf>(InterfaceCANTx(can_, GET__DEVICE(), port),
-                               GET__DEVICE(), std::forward<Args>(args)...);
+    auto interface = std::make_shared<Intf>(GetCANTx(port), GET__DEVICE(),
+                                            std::forward<Args>(args)...);
     AddInterface(port, interface);
 
     return interface;
