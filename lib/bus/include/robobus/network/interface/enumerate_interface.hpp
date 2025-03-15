@@ -338,6 +338,10 @@ class EnumerateInterface : public IInterface,
 
   template <runtime::RuntimeImpl Runtime>
   Coroutine<Address> AwaitEnumerated(runtime::Loop<Runtime>& loop) {
+    if (this->device.IsInitialized()) {
+      co_return this->device.GetSelfId();
+    }
+
     using Awaiter = runtime::LazyResumerAwaiter<Address, Runtime>;
 
     on_enumerate_finished_ = std::make_unique<Awaiter>(loop);
