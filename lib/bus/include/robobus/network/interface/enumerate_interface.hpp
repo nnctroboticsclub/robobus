@@ -70,7 +70,7 @@ class EnumerateInterface;
 struct IEnumHandler {
   virtual ~IEnumHandler() = default;
   virtual void OnDeviceFound(Address const& device_address) = 0;
-  virtual void OnAssociated(EnumerateInterface* intf) = 0;
+  virtual void OnAssociated(EnumerateInterface* intf, Device& device) = 0;
 };
 
 /// @brief Enumerate インタフェース
@@ -250,7 +250,7 @@ class EnumerateInterface : public IInterface,
   EnumerateInterface(InterfaceCANTx can_tx, Device& device_,
                      std::shared_ptr<IEnumHandler> handler)
       : CANTxMixin(can_tx, device_), SyncRxMixin(), handler(handler) {
-    handler->OnAssociated(this);
+    handler->OnAssociated(this, device_);
   }
 
   [[nodiscard]] uint8_t GetID() const final { return 0x00; }
