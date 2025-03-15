@@ -128,15 +128,41 @@ class RootInterface : public IInterface, public CANTxMixin, public SyncRxMixin {
     using enum Opcodes;
     switch (opcode) {
       case kLookup: {
-        auto intf = data[1];
+        auto intf_id = data[1];
 
-        SendSummary(from, intf, self_ownership_table[intf]);
+        auto eps = self_ownership_table.contains(intf_id)
+                       ? self_ownership_table[intf_id]
+                       : IntfEPs{};
+
+        auto self_interfaces = device_.GetInterfaces();
+        for (auto& [port, intf] : self_interfaces) {
+          if (intf->GetID() == intf_id) {
+            eps.emplace_back(
+                Detail{.dev = device_.GetSelfId().Get(), .port = port});
+          }
+        }
+
+        SendSummary(from, intf_id, eps);
+
         break;
       }
       case kExplainOwnership: {
-        auto intf = data[1];
-        auto index = data[1];
-        SendDetail(from, intf, self_ownership_table[intf][index]);
+        auto intf_id = data[1];
+
+        auto eps = self_ownership_table.contains(intf_id)
+                       ? self_ownership_table[intf_id]
+                       : IntfEPs{};
+
+        auto self_interfaces = device_.GetInterfaces();
+        for (auto& [port, intf] : self_interfaces) {
+          if (intf->GetID() == intf_id) {
+            eps.emplace_back(
+                Detail{.dev = device_.GetSelfId().Get(), .port = port});
+          }
+        }
+
+        auto index = data[2];
+        SendDetail(from, intf_id, self_ownership_table[intf_id][index]);
         break;
       }
 
@@ -174,6 +200,8 @@ class RootInterface : public IInterface, public CANTxMixin, public SyncRxMixin {
 
     self_ownership_table[intf_id].emplace_back(
         Detail{.dev = dev_id, .port = port});
+
+    logger.Info("Intf registered: I%02x D%02x/p%02x", intf_id, dev_id, port);
   }
   template <typename Interface>
   auto RegisterInterface(uint8_t dev_id, uint8_t port) {

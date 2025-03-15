@@ -1,11 +1,14 @@
-add_library(robobus-bus INTERFACE)
-
-target_include_directories(robobus-bus INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+add_library(robobus-bus STATIC
+    include/robobus/network/interface/dummy.cpp
 )
 
-target_link_libraries(robobus-bus INTERFACE
+target_include_directories(robobus-bus PUBLIC
+    include
+)
+
+target_link_libraries(robobus-bus PUBLIC
     syoch-robotics-common
     syoch-robotics-logger
     rd16
+    robobus-runtime
 )
