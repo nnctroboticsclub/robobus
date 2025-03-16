@@ -20,36 +20,58 @@ class ImmediacyAwaiter final
   static inline robotics::logger::Logger logger{"coroutine.imm-await",
                                                 "ImmediacyAwaiter"};
 
+  static constexpr bool kVerbose = false;
+
  public:
   ~ImmediacyAwaiter() final = default;
 
   void Reset() {
-    // logger.Trace("\x1b[2;35m(%p)\x1b[m Resetted awaiter", this);
+    if (this->waiter_available) {
+      logger.Error("\x1b[2;35m(%p)\x1b[m %p: Reset with awaiter.", this,
+                   handle);
+      asm("bkpt #1");
+    }
+    if (kVerbose)
+      logger.Trace("\x1b[2;35m(%p)\x1b[m Resetted awaiter", this);
+
     return_value = std::nullopt;
     this->waiter_available = false;
   }
 
   void Resume(T value) final {
-    // logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Resume", this, handle);
+    if (not waiter_available) {
+      logger.Error("\x1b[2;35m(%p)\x1b[m %p: Resumed without awaiter.", this,
+                   handle);
+      asm("bkpt #1");
+    }
+
+    if (kVerbose)
+      logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Resume", this, handle);
+
+    auto handle_ = handle;
+
+    this->waiter_available = false;
     this->return_value = value;
-    this->handle.resume();
+    this->handle = nullptr;
+
+    handle_.resume();
   }
 
-  bool IsWaiterAvailable() const { return waiter_available; }
-
-  bool await_ready() const final { return return_value.has_value(); }
+  bool await_ready() const final { return waiter_available; }
 
   void await_suspend(std::coroutine_handle<> handle) final {
-    this->handle = handle;
     this->waiter_available = true;
+    this->handle = handle;
 
-    // logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Suspended", this, handle);
+    if (kVerbose)
+      logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Suspended", this, handle);
   }
 
   T await_resume() final {
     // we dont need check if return_value has any value since this awaiter
     // must be resumed by call the ImmediacyAwaiter::Resume()
-    // logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Returning value", this, handle);
+    if (kVerbose)
+      logger.Trace("\x1b[2;35m(%p)\x1b[m %p: Returning value", this, handle);
     return *return_value;
   }
 
