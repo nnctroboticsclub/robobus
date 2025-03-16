@@ -296,14 +296,11 @@ class EnumerateInterface : public IInterface,
 
       Send(from, {static_cast<uint8_t>(kAssignID), new_device_id.Get()});
 
-      logger.Info("Assigning device id %d for tag %d", new_device_id.Get(),
-                  from.Get());
       handler->OnDeviceFound(new_device_id);
     } else if (command == kAssignID && this->device.IsIdWaiting()) {
       auto new_device_id = Address(data[1]);
       this->device.TransitionToInitialized(new_device_id);
 
-      logger.Info("Device initialized with id %d", new_device_id.Get());
       if (on_enumerate_finished_.has_value()) {
         (*on_enumerate_finished_)->Resume(new_device_id);
       }
