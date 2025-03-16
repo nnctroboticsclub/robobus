@@ -15,6 +15,7 @@
 #include <robobus/runtime/runtime_impls.hpp>
 
 #include <robotics/random/random.hpp>
+#include "robobus/runtime/sleep.hpp"
 
 namespace robobus::network::interface::enumerate {
 
@@ -62,6 +63,15 @@ enum class Opcode : uint8_t {
   // String information
   kQueryString = 0x14,
   kStringResponse = 0x15,
+
+  // String information
+  kFindInterface = 0x16,
+  kInterfaceReference = 0x17,
+};
+
+struct InterfaceRef {
+  Address dev;
+  uint8_t port;
 };
 
 // forward declaration
@@ -86,6 +96,7 @@ class EnumerateInterface : public IInterface,
   using SyncRxMixin::ReceiveAwait;
 
   DeviceIDManager device_id_manager_;
+  Device& device_;
 
   /// @brief 送信用に収集されたテキストのリスト
   CollectingEncoder<std::string> collected_strings_;
@@ -103,6 +114,9 @@ class EnumerateInterface : public IInterface,
 
   /// @brief 上位層のハンドラ
   std::shared_ptr<IEnumHandler> handler;
+
+  /// @brief FindInterface の結果を格納するやつ
+  std::vector<InterfaceRef> find_interface_results_;
 
   void SendDevice(Address dest, DeviceSummary const& summary) const {
     for (auto& intf : summary.interfaces) {
@@ -249,7 +263,10 @@ class EnumerateInterface : public IInterface,
  public:
   EnumerateInterface(InterfaceCANTx can_tx, Device& device_,
                      std::shared_ptr<IEnumHandler> handler)
-      : CANTxMixin(can_tx, device_), SyncRxMixin(), handler(handler) {
+      : CANTxMixin(can_tx, device_),
+        SyncRxMixin(),
+        handler(handler),
+        device_(device_) {
     handler->OnAssociated(this, device_);
   }
 
@@ -326,6 +343,33 @@ class EnumerateInterface : public IInterface,
         SendString(from, str_id, index);
         break;
       }
+
+      case kInterfaceReference: {
+        auto intf_port = data[1];
+
+        find_interface_results_.push_back({
+            .dev = from,
+            .port = intf_port,
+        });
+
+        break;
+      }
+
+      case kFindInterface: {
+        auto intf_id = data[1];
+
+        for (auto& [port, intf] : device_.GetInterfaces()) {
+          if (intf->GetID() != intf_id)
+            continue;
+
+          Send(from, {
+                         static_cast<uint8_t>(Opcode::kInterfaceReference),
+                         port,
+                     });
+        }
+        break;
+      }
+
       default: {
         break;
       }
@@ -346,6 +390,23 @@ class EnumerateInterface : public IInterface,
 
     on_enumerate_finished_ = std::make_unique<Awaiter>(loop);
     co_return co_await** on_enumerate_finished_;
+  }
+
+  template <runtime::RuntimeImpl Runtime>
+  Coroutine<std::vector<InterfaceRef>> FindInterface(
+      runtime::Loop<Runtime>& loop, uint8_t interface_id) {
+    using namespace std::chrono_literals;
+
+    this->find_interface_results_ = {};
+    Send(Address::Broadcast(),
+         {static_cast<uint8_t>(Opcode::kFindInterface), interface_id});
+
+    co_await robobus::runtime::Sleep(loop, 100ms);
+
+    auto ret = this->find_interface_results_;
+    this->find_interface_results_ = {};
+
+    co_return ret;
   }
 
   void FindEnumeratedDevices() const {
