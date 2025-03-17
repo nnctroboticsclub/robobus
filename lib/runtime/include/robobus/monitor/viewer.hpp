@@ -18,7 +18,7 @@ concept ViewerHandler = requires {
 //! Occupies stdout
 template <ViewerHandler vHandler, robobus::runtime::RuntimeImpl Runtime,
           internal::StringLiteral kPath>
-coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath>&& ctx) {
+coroutine::Coroutine<void> Viewer(context::Context<Runtime, kPath> ctx) {
   using namespace std::chrono_literals;
 
   static char command_buf[256] = {0};
