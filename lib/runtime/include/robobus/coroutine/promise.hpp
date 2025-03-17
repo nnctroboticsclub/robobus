@@ -58,6 +58,10 @@ struct Promise<ReturnType> : public BasePromise<ReturnType> {
 
  public:
   auto return_value(ReturnType value) {
+    printf("return_value called for %p (handle = %p)\n", this,
+           std::coroutine_handle<Promise<ReturnType>>::from_promise(*this)
+               .address());
+
     this->value_ = std::move(value);
     this->Return();
 
@@ -75,6 +79,8 @@ struct Promise<void> : public BasePromise<void> {
 
  public:
   auto return_void() {
+    printf("return_void called for %p (handle = %p)\n", this,
+           std::coroutine_handle<Promise<void>>::from_promise(*this).address());
     finished = true;
     this->Return();
 

@@ -25,19 +25,6 @@ class ImmediacyAwaiter final
  public:
   ~ImmediacyAwaiter() final = default;
 
-  void Reset() {
-    if (this->waiter_available) {
-      logger.Error("\x1b[2;35m(%p)\x1b[m %p: Reset with awaiter.", this,
-                   handle);
-      asm("bkpt #1");
-    }
-    if (kVerbose)
-      logger.Trace("\x1b[2;35m(%p)\x1b[m Resetted awaiter", this);
-
-    return_value = std::nullopt;
-    this->waiter_available = false;
-  }
-
   void Resume(T value) final {
     if (not waiter_available) {
       logger.Error("\x1b[2;35m(%p)\x1b[m %p: Resumed without awaiter.", this,

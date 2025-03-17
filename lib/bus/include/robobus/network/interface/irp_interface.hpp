@@ -17,10 +17,11 @@ concept IRPHandler = requires {
   { T::EnterFastBootloader() } -> std::same_as<void>;
 };
 
+static robotics::logger::Logger logger{"test->robo-bus.irp", "IRP"};
+
 template <IRPHandler Handler>
 class IRPInterface : public robobus::network::IInterface,
                      public robobus::network::CANTxMixin {
-  static inline robotics::logger::Logger logger{"test->robo-bus.irp", "IRP"};
 
   //! IRP インタフェースが生成される前の LogSink のバックアップ
   //! ChainedSink の Sink1 として使用される．

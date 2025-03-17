@@ -28,8 +28,8 @@ class RootContext : public internal::NonCopyable<RootContext<Runtime>> {
   auto GetLoop() -> runtime::Loop<Runtime>& { return loop_; }
 
   template <internal::StringLiteral tag>
-  auto& Child() {
-    return *new Context<Runtime, tag>(this);
+  auto Child() {
+    return Context<Runtime, tag>(this);
   }
 };
 }  // namespace robobus::context

@@ -21,6 +21,7 @@ struct CoroutineAwaiter<ReturnType> {
   bool await_ready() const { return (bool)promise.get_return_value(); }
 
   void await_suspend(std::coroutine_handle<> handle) {
+    printf("%p aw from %p\n", this, handle.address());
     promise.AddOnReturnCallback([handle]() { handle.resume(); });
   }
 

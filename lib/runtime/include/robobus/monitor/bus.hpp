@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include <memory>
 #include <robotics/utils/singleton.hpp>
 
 #include <robobus/console/interpreter.hpp>
@@ -44,10 +45,8 @@ class Bus : public robotics::utils::Singleton<Bus> {
     }
   }
 
-  void RegisterLogger() {
-    auto* adapter = new srobo1::LogMonitor::LoggerAdapter{log_monitor_};
-
-    robotics::logger::global_log_sink = adapter;
+  auto GetLogger() {
+    return std::make_shared<srobo1::LogMonitor::LoggerAdapter>(log_monitor_);
   }
 };
 }  // namespace robobus::monitor

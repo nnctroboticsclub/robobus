@@ -43,8 +43,8 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
   constexpr runtime::Loop<Runtime>& GetLoop() { return Root()->GetLoop(); }
 
   template <internal::StringLiteral tag>
-  auto& Child() {
-    return *new Context<Runtime, ConcatPath<kPath, tag>>(Root());
+  auto Child() {
+    return Context<Runtime, ConcatPath<kPath, tag>>(Root());
   }
 
   auto Sleep(std::chrono::milliseconds duration) {
@@ -54,17 +54,6 @@ class Context : public internal::NonCopyable<Context<Runtime, kPath>> {
   template <internal::StringLiteral kName>
   auto GetDebugInfo() -> debug::DebugInfo<Runtime, ConcatPath<kPath, kName>> {
     return debug::DebugInfo<Runtime, ConcatPath<kPath, kName>>();
-  }
-
-  robotics::logger::Logger& Logger() {
-    if (!logger_) {
-      auto cid_cstr = new char[decltype(kPath)::size + 1];
-      std::strcpy(cid_cstr, kPath.data);
-
-      logger_ = new robotics::logger::Logger(cid_cstr, cid_cstr);
-    }
-
-    return *logger_;
   }
 };
 
