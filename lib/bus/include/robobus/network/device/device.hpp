@@ -122,9 +122,8 @@ class Device : public robobus::internal::NonCopyable<Device> {
   /// @brief Robobus ルーチンでデバイスの状態を監視するコルーチン.
   template <robobus::runtime::RuntimeImpl Runtime,
             robobus::internal::StringLiteral kPath>
-  Coroutine<void> StartMonitor(Context<Runtime, kPath>&& ctx_) {
+  Coroutine<void> StartMonitor(Context<Runtime, kPath> ctx) {
     using namespace std::chrono_literals;
-    Context<Runtime, kPath> ctx = std::move(ctx_);
 
     auto entry = ctx.template GetDebugInfo<"Device">();
 
