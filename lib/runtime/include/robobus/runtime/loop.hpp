@@ -25,16 +25,10 @@ struct ResumeRequest {
   std::coroutine_handle<> coroutine;
 };
 
-struct InstantResumeRequest {
-  std::coroutine_handle<> coroutine;
-};
-
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
-  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 48> resume_list_lifo_;
-  robotics::utils::NoMutexLIFO<InstantResumeRequest, 48>
-      instant_resume_list_lifo_;
+  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 96> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
@@ -67,16 +61,6 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     }
   }
 
-  void ProcessInstantResumeList() {
-    while (!instant_resume_list_lifo_.Empty()) {
-      auto ptr = instant_resume_list_lifo_.Pop();
-
-      // printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p --| Instant |--> %p\n",
-      //        this, this, ptr.coroutine.address());
-      ptr.coroutine.resume();
-    }
-  }
-
  public:
   Loop(Loop const&) = delete;
   Loop& operator=(Loop const&) = delete;
@@ -92,14 +76,6 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
 
     while (!resume_list_lifo_.Empty()) {
       resume_list_lifo_.Pop();
-    }
-
-    while (!instant_resume_list_lifo_.Full()) {
-      instant_resume_list_lifo_.Push(InstantResumeRequest{});
-    }
-
-    while (!instant_resume_list_lifo_.Empty()) {
-      instant_resume_list_lifo_.Pop();
     }
 
     printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p[Loop]\n", this, this);
@@ -126,12 +102,14 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
   }
 
   void ScheduleResumeInstantly(std::coroutine_handle<> coroutine) {
-    if (instant_resume_list_lifo_.Full()) {
+    if (resume_list_lifo_.Full()) {
       printf("\x1b[41m \x1b[43m \x1b[0m%p InstantResumeLIFO Full\n", this,
              this);
       return;
     }
-    instant_resume_list_lifo_.Push(InstantResumeRequest{coroutine});
+    resume_list_lifo_.Push(ResumeRequest<Runtime>{
+        .time_point = time.Now() - std::chrono::milliseconds(1),
+        .coroutine = coroutine});
   }
 
   //* Root context
@@ -139,7 +117,6 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     while (true) {
       time.Tick();
       ProcessResumeList();
-      ProcessInstantResumeList();
     }
   }
 
