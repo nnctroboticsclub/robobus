@@ -7,7 +7,10 @@
 
 #include <logger/logger.hpp>
 
-namespace robobus::coroutine {
+namespace robobus::coroutine::imm_awaiter {
+static inline robotics::logger::Logger logger{"coroutine.imm-await",
+                                              "ImmediacyAwaiter"};
+
 /// @brief Resume が呼ばれたらそのコンテキストでコルーチンを再開するためのAwaiter
 /// @details この Awaiter は主に， Await する側と Resume する側を分離することが目的
 /// これにより，コールバック関数 + ステートマシンのような構成のプログラムを
@@ -17,8 +20,6 @@ template <typename T>
 class ImmediacyAwaiter final
     : public robobus::coroutine::IAwaiter<T>,
       public robobus::internal::NonCopyable<ImmediacyAwaiter<T>> {
-  static inline robotics::logger::Logger logger{"coroutine.imm-await",
-                                                "ImmediacyAwaiter"};
 
   static constexpr bool kVerbose = false;
 
@@ -67,4 +68,8 @@ class ImmediacyAwaiter final
   std::coroutine_handle<> handle = nullptr;
   std::optional<T> return_value = std::nullopt;
 };
+}  // namespace robobus::coroutine::imm_awaiter
+
+namespace robobus::coroutine {
+using imm_awaiter::ImmediacyAwaiter;
 }  // namespace robobus::coroutine
