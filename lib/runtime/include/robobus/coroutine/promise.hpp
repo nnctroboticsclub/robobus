@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 #include "robobus/coroutine/coroutine.hpp"
+#include "robobus/coroutine/coroutine_awaiter.hpp"
 #include "robobus/coroutine/generic_awaiter.hpp"
 
 namespace robobus::coroutine {
@@ -19,7 +20,14 @@ struct Promise;
 template <typename ReturnType>
 class BasePromise {
  protected:
-  void Return() const {
+  void Return() {
+    if (is_finished) {
+      printf("\x1b[41m \x1b[42m \x1b[0m%p Promise returned twice\n", this);
+      while (1)
+        ;
+      return;
+    }
+    is_finished = true;
     for (auto& callback : on_return_callbacks) {
       callback();
     }
@@ -34,6 +42,8 @@ class BasePromise {
     return *static_cast<Promise<ReturnType>*>(this);
   }
 
+  [[nodiscard]] auto IsFinished() const { return is_finished; }
+
  public:
   auto get_return_object() {
     return Coroutine<ReturnType>{
@@ -47,22 +57,23 @@ class BasePromise {
   auto unhandled_exception() { std::terminate(); }
 
  private:
+  bool is_finished = false;
   std::vector<std::function<void()>> on_return_callbacks;
 };
 
 //* Promise
-template <std::move_constructible ReturnType>
+template <std::copy_constructible ReturnType>
 struct Promise<ReturnType> : public BasePromise<ReturnType> {
  public:
   auto get_return_value() { return value_; }
 
  public:
   auto return_value(ReturnType value) {
-    printf("return_value called for %p (handle = %p)\n", this,
-           std::coroutine_handle<Promise<ReturnType>>::from_promise(*this)
-               .address());
+    // printf("\x1b[41m \x1b[42m \x1b[0m%p return_value (handle = %p)\n", this,
+    //        std::coroutine_handle<Promise<ReturnType>>::from_promise(*this)
+    //            .address());
 
-    this->value_ = std::move(value);
+    this->value_ = value;
     this->Return();
 
     return std::suspend_never{};
@@ -79,8 +90,8 @@ struct Promise<void> : public BasePromise<void> {
 
  public:
   auto return_void() {
-    printf("return_void called for %p (handle = %p)\n", this,
-           std::coroutine_handle<Promise<void>>::from_promise(*this).address());
+    // printf("\x1b[41m \x1b[42m \x1b[0m%p return_value (handle = %p)\n", this,
+    //        std::coroutine_handle<Promise<void>>::from_promise(*this).address());
     finished = true;
     this->Return();
 
