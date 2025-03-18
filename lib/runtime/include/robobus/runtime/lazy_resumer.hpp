@@ -12,6 +12,8 @@
 /// ただし，リアルタイム性が必要な通信においてはその限りではない．
 /// @note この機能は，Loop の ScheduleResumeInstantly によって Resume される．
 
+#include <coroutine>
+#include <functional>
 #include <type_traits>
 #include "robobus/coroutine/generic_awaiter.hpp"
 #include "robobus/runtime/loop.hpp"
@@ -20,28 +22,66 @@
 namespace robobus::runtime {
 /// @brief 遅延再開 Awaiter
 /// @tparam T コルーチンの戻り値の型
-template <typename T, RuntimeImpl Runtime>
+template <typename T>
 requires std::is_copy_constructible_v<T> class LazyResumerAwaiter
     : public coroutine::IAwaiter<T> {
-  Loop<Runtime>& loop;
+
+  bool waiter_available = false;
   std::coroutine_handle<> handle = nullptr;
   std::optional<T> value;
+  std::function<void(std::coroutine_handle<>)> instant_resumer;
 
  public:
-  explicit LazyResumerAwaiter(Loop<Runtime>& ctx) : loop(ctx) {}
+  ~LazyResumerAwaiter() = default;
 
-  void Resume(T value) final {
-    this->value = value;
-    loop.ScheduleResumeInstantly(handle);
+  template <RuntimeImpl Runtime>
+  void AssociateLoop(Loop<Runtime>& loop) {
+    instant_resumer = [&loop](std::coroutine_handle<> handle) {
+      loop.ScheduleResumeInstantly(handle);
+    };
   }
 
-  bool await_ready() const final { return false; }
+  template <RuntimeImpl Runtime>
+  void Resume(Loop<Runtime>& loop, T value) {
+    if (not waiter_available) {
+      printf("\x1b[2;35m(%p)\x1b[m %p: Resumed without awaiter.", this, handle);
+      while (true)
+        ;
+    }
+
+    this->value = value;
+    loop.ScheduleResumeInstantly(handle);
+    this->waiter_available = false;
+    this->handle = nullptr;
+  }
+
+  void Resume(T value) final {
+    if (not waiter_available) {
+      printf("\x1b[2;35m(%p)\x1b[m %p: Resumed without awaiter.", this, handle);
+      while (true)
+        ;
+    }
+
+    if (not instant_resumer) {
+      printf("\x1b[2;35m(%p)\x1b[m %p: Instant resumer is not set.", this,
+             handle);
+      while (true)
+        ;
+    }
+
+    this->value = value;
+    instant_resumer(handle);
+    this->waiter_available = false;
+    this->handle = nullptr;
+  }
+
+  bool await_ready() const final { return waiter_available; }
 
   void await_suspend(std::coroutine_handle<> handle) final {
+    waiter_available = true;
     this->handle = handle;
   }
 
   T await_resume() final { return *value; }
 };
-struct LazyResumer {};
 }  // namespace robobus::runtime
