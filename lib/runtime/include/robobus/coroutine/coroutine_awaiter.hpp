@@ -14,22 +14,35 @@ template <typename ReturnType>
 struct CoroutineAwaiter;
 
 //* CoroutineAwaiter
-template <std::move_constructible ReturnType>
+template <std::copy_constructible ReturnType>
 struct CoroutineAwaiter<ReturnType> {
-  explicit CoroutineAwaiter(Promise<ReturnType>& promise) : promise(promise) {}
+  explicit CoroutineAwaiter(Promise<ReturnType>& promise) : promise(promise) {
+    waitee_handle =
+        std::coroutine_handle<Promise<ReturnType>>::from_promise(promise);
+  }
 
-  bool await_ready() const { return (bool)promise.get_return_value(); }
+  bool await_ready() const {
+    // printf("\x1b[41m  \x1b[0m%p %p.done? --> %d\n", this,
+    //        waitee_handle.address(), promise.IsFinished());
+    return promise.IsFinished();
+  }
 
-  void await_suspend(std::coroutine_handle<> handle) {
-    printf("%p aw from %p\n", this, handle.address());
-    promise.AddOnReturnCallback([handle]() { handle.resume(); });
+  void await_suspend(std::coroutine_handle<> waiter_handle) {
+    // printf("\x1b[41m  \x1b[0m%p __GRAPH__ %p --| Ca_%p |--> %p\n", this,
+    //        waiter_handle.address(), this, waitee_handle.address());
+    promise.AddOnReturnCallback([this, waiter_handle]() {
+      // printf("\x1b[41m  \x1b[0m%p __GRAPH__ %p --| Ca_%p - resumed |--> %p\n",
+      //        this, waitee_handle.address(), this, waiter_handle.address());
+      waiter_handle.resume();
+    });
   }
 
   auto await_resume() const {
-    if (promise.get_return_value()) {
-      return std::move(promise.get_return_value().value());
+    if (promise.IsFinished()) {
+      // printf("\x1b[41m  \x1b[0m%p Await_resume with fulfilled promise\n", this);
+      return promise.get_return_value().value();
     } else {
-      logger.Error("Await_resume was called for not finished promise");
+      // printf("\x1b[41m  \x1b[0m%p Await_resume with pending promise\n", this);
       while (true)
         ;
     }
@@ -37,20 +50,34 @@ struct CoroutineAwaiter<ReturnType> {
 
  private:
   Promise<ReturnType>& promise;
+  std::coroutine_handle<> waitee_handle;
 };
 
 template <>
 struct CoroutineAwaiter<void> {
-  explicit CoroutineAwaiter(Promise<void>& promise) : promise(promise) {}
+  explicit CoroutineAwaiter(Promise<void>& promise) : promise(promise) {
+    waitee_handle = std::coroutine_handle<Promise<void>>::from_promise(promise);
+  }
 
-  bool await_ready() const { return promise.get_return_value(); }
-  void await_suspend(std::coroutine_handle<> handle) {
-    promise.AddOnReturnCallback([handle]() { handle.resume(); });
+  bool await_ready() const {
+    // printf("\x1b[41m  \x1b[0m%p %p.done? --> %d\n", this,
+    //        waitee_handle.address(), promise.IsFinished());
+    return promise.IsFinished();
+  }
+  void await_suspend(std::coroutine_handle<> waiter_handle) {
+    // printf("\x1b[41m  \x1b[0m%p __GRAPH__ %p --| Ca_%p |--> %p\n", this,
+    //        waiter_handle.address(), this, waitee_handle.address());
+    promise.AddOnReturnCallback([this, waiter_handle]() {
+      // printf("\x1b[41m  \x1b[0m%p __GRAPH__ %p --| Ca_%p - resumed |--> %p\n",
+      //        this, waitee_handle.address(), this, waiter_handle.address());
+      waiter_handle.resume();
+    });
   }
   auto await_resume() const { return; }
 
  private:
   Promise<void>& promise;
+  std::coroutine_handle<> waitee_handle;
 };
 
 static_assert(AwaiterLike<CoroutineAwaiter<void>, void>,

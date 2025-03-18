@@ -83,14 +83,14 @@ struct IEnumHandler {
   virtual void OnAssociated(EnumerateInterface* intf, Device& device) = 0;
 };
 
+// static inline robotics::logger::Logger logger{"test->robo-bus.enum", "Device"};
+
 /// @brief Enumerate インタフェース
 /// @details Enumerate インタフェースは，デバイスの列挙機能及び，デバイスのメタデータの取得機能を提供する．
 /// また， Advertisement Tag を用いる唯一のインタフェースである．
 class EnumerateInterface : public IInterface,
                            public CANTxMixin,
                            public SyncRxMixin {
-  static inline robotics::logger::Logger logger{"test->robo-bus.enum",
-                                                "Device"};
 
   using CANTxMixin::Send;
   using SyncRxMixin::ReceiveAwait;
@@ -110,7 +110,7 @@ class EnumerateInterface : public IInterface,
   std::string creator_;
   std::string name_;
 
-  std::optional<coroutine::IAwaiterRef<Address>> on_enumerate_finished_;
+  runtime::LazyResumerAwaiter<Address> on_enumerate_finished_;
 
   /// @brief 上位層のハンドラ
   std::shared_ptr<IEnumHandler> handler;
@@ -265,8 +265,9 @@ class EnumerateInterface : public IInterface,
                      std::shared_ptr<IEnumHandler> handler)
       : CANTxMixin(can_tx, device_),
         SyncRxMixin(),
-        handler(handler),
-        device_(device_) {
+
+        device_(device_),
+        handler(handler) {
     handler->OnAssociated(this, device_);
   }
 
@@ -301,8 +302,8 @@ class EnumerateInterface : public IInterface,
       auto new_device_id = Address(data[1]);
       this->device.TransitionToInitialized(new_device_id);
 
-      if (on_enumerate_finished_.has_value()) {
-        (*on_enumerate_finished_)->Resume(new_device_id);
+      if (on_enumerate_finished_.await_ready()) {
+        on_enumerate_finished_.Resume(new_device_id);
       }
     }
 
@@ -382,11 +383,8 @@ class EnumerateInterface : public IInterface,
     if (this->device.IsInitialized()) {
       co_return this->device.GetSelfId();
     }
-
-    using Awaiter = runtime::LazyResumerAwaiter<Address, Runtime>;
-
-    on_enumerate_finished_ = std::make_unique<Awaiter>(loop);
-    co_return co_await** on_enumerate_finished_;
+    on_enumerate_finished_.AssociateLoop(loop);
+    co_return co_await on_enumerate_finished_;
   }
 
   template <runtime::RuntimeImpl Runtime>

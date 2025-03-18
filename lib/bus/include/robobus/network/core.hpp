@@ -37,7 +37,7 @@ class RobobusNetwork {
       }
     }
 
-    logger.Error("Unknown interface %d", interface_id);
+    printf("Unknown interface %d", interface_id);
   }
 
   auto& GET__DEVICE() { return device_self_; }

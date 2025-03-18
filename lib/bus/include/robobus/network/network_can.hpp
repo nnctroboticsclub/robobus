@@ -5,7 +5,7 @@
 namespace robobus::network {
 /// @brief RobobusNetwork の CAN ラッパー
 class RobobusOnCAN : public RobobusNetwork {
-  static inline robotics::logger::Logger logger{"test->robo-bus.can", "Device"};
+  // static inline robotics::logger::Logger logger{"test->robo-bus.can", "Device"};
   std::shared_ptr<robotics::network::CANBase> can_;
 
  public:
@@ -17,7 +17,7 @@ class RobobusOnCAN : public RobobusNetwork {
       if (msg_id.GetKind() == MessageKind::kRawP2P) {
         this->HandleP2PMessage(P2PMessageID(id), data);
       } else {
-        logger.Error("Unknown message ID: %08lx", id);
+        printf("Unknown message ID: %08x", id);
       }
     });
   }

@@ -11,8 +11,8 @@
 #include <concepts>
 #include <coroutine>
 #include <memory>
-#include <type_traits>
 #include <utility>
+
 namespace robobus::coroutine {
 /// @brief Dynamic Dispatch 用の Awaiter 純粋仮想クラス
 /// @tparam T Awaiter の戻り値の型
