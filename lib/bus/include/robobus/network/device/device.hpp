@@ -149,6 +149,8 @@ class Device : public robobus::internal::NonCopyable<Device> {
 
       co_await ctx.Sleep(20ms);
     }
+
+    co_return;
   }
 };
 }  // namespace robobus::network::device

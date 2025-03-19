@@ -28,8 +28,8 @@ requires std::is_copy_constructible_v<T> class LazyResumerAwaiter
 
   bool waiter_available = false;
   std::coroutine_handle<> handle = nullptr;
-  std::optional<T> value;
-  std::function<void(std::coroutine_handle<>)> instant_resumer;
+  std::optional<T> value = std::nullopt;
+  std::function<void(std::coroutine_handle<>)> instant_resumer = nullptr;
 
  public:
   ~LazyResumerAwaiter() = default;
@@ -71,6 +71,8 @@ requires std::is_copy_constructible_v<T> class LazyResumerAwaiter
 
     this->value = value;
     instant_resumer(handle);
+    printf("\x1b[2;35m(%p)\x1b[m %p: Resumed.", this, handle.address());
+
     this->waiter_available = false;
     this->handle = nullptr;
   }
@@ -78,6 +80,7 @@ requires std::is_copy_constructible_v<T> class LazyResumerAwaiter
   bool await_ready() const final { return waiter_available; }
 
   void await_suspend(std::coroutine_handle<> handle) final {
+    printf("\x1b[2;35m(%p)\x1b[m %p: Suspended", this, handle.address());
     waiter_available = true;
     this->handle = handle;
   }

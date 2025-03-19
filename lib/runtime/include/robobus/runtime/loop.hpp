@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <vector>
 
 #include <coroutine>
 
@@ -28,7 +29,7 @@ struct ResumeRequest {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
-  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 96> resume_list_lifo_;
+  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 64> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
@@ -40,6 +41,8 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     if (resume_list_lifo_.Empty()) {
       printf("There is no coroutine in waiting list\n");
     }
+
+    std::vector<std::coroutine_handle<>> handles;
 
     const size_t it_max = resume_list_lifo_.Size();
     for (size_t i = 0; i < it_max && !resume_list_lifo_.Empty(); i++) {
@@ -55,9 +58,13 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
         continue;
       }
 
-      // printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p --| Timer |--> %p\n",
-      //        this, this, coro.address());
-      coro.resume();
+      handles.emplace_back(coro);
+    }
+
+    for (auto handle : handles) {
+      //printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p --| Timer |--> %p\n",
+      //       this, this, coro.address());
+      handle.resume();
     }
   }
 

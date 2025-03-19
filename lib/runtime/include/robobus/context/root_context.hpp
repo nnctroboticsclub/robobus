@@ -18,9 +18,6 @@ class RootContext : public internal::NonCopyable<RootContext<Runtime>> {
   runtime::Loop<Runtime> loop_{};
 
  public:
-  RootContext(RootContext<Runtime>&& other) noexcept
-      : loop_(std::move(other.loop_)) {}
-
   RootContext() = default;
 
   [[noreturn]] auto Run() -> void { loop_.Run(); }

@@ -377,14 +377,43 @@ class EnumerateInterface : public IInterface,
   Coroutine<DeviceSummary> inline Query(Address dev) {
     return QueryDevice(dev);
   }
+  struct CoroutineHandleInspector {
+    std::coroutine_handle<> _handle;
+
+    bool await_ready() const noexcept { return false; }
+    bool await_suspend(std::coroutine_handle<> handle) noexcept {
+      _handle = handle;
+      return false;
+    }
+    std::coroutine_handle<> await_resume() noexcept { return _handle; }
+  };
 
   template <runtime::RuntimeImpl Runtime>
   Coroutine<Address> AwaitEnumerated(runtime::Loop<Runtime>& loop) {
+    struct CoroutineHandleInspector {
+      std::coroutine_handle<> _handle;
+
+      bool await_ready() const noexcept { return false; }
+      bool await_suspend(std::coroutine_handle<> handle) noexcept {
+        _handle = handle;
+        return false;
+      }
+      std::coroutine_handle<> await_resume() noexcept { return _handle; }
+    };
+
+    printf("AE: -->\n");
     if (this->device.IsInitialized()) {
+      printf("AE: <--\n");
       co_return this->device.GetSelfId();
     }
+    printf("AE: | loop = %p\n", &loop);
     on_enumerate_finished_.AssociateLoop(loop);
-    co_return co_await on_enumerate_finished_;
+    auto h = co_await CoroutineHandleInspector{};
+    printf("AE: | handle = %p\n", h.address());
+    printf("AE: | awaiting...\n");
+    auto ret = co_await on_enumerate_finished_;
+    printf("AE: <--  resumed\n");
+    co_return ret;
   }
 
   template <runtime::RuntimeImpl Runtime>
