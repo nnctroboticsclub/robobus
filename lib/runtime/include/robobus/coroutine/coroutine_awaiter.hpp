@@ -8,8 +8,6 @@
 
 namespace robobus::coroutine {
 
-robotics::logger::Logger logger{"coro.rb", "RB/Coro"};
-
 template <typename ReturnType>
 struct CoroutineAwaiter;
 
