@@ -51,8 +51,6 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
       auto& c_time = ptr.time_point;
       auto& coro = ptr.coroutine;
 
-      auto grace = c_time - now;
-
       if (c_time > now) {
         resume_list_lifo_.Push(ptr);
         continue;
@@ -69,23 +67,14 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
   }
 
  public:
-  Loop(Loop const&) = delete;
-  Loop& operator=(Loop const&) = delete;
-
   Loop(Loop&& other) noexcept
       : resume_list_lifo_(std::move(other.resume_list_lifo_)),
         time(std::move(other.time)) {}
 
   Loop() {
-    while (!resume_list_lifo_.Full()) {
-      resume_list_lifo_.Push(ResumeRequest<Runtime>{});
-    }
+    resume_list_lifo_.Clear();
 
-    while (!resume_list_lifo_.Empty()) {
-      resume_list_lifo_.Pop();
-    }
-
-    printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p[Loop]\n", this, this);
+    // printf("\x1b[41m \x1b[43m \x1b[0m%p __GRAPH__ %p[Loop]\n", this, this);
   }
 
   //* Loop traits
