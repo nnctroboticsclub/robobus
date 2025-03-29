@@ -33,13 +33,14 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
 
  public:
   TimeContext<typename Runtime::Clock> time;
+  bool task_finished_ = false;
 
  private:
   void ProcessResumeList() {
     const auto now = time.Now();
 
     if (resume_list_lifo_.Empty()) {
-      printf("There is no coroutine in waiting list\n");
+      task_finished_ = true;
     }
 
     std::vector<std::coroutine_handle<>> handles;
@@ -109,8 +110,9 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
   }
 
   //* Root context
-  [[noreturn]] void Run() {
-    while (true) {
+  void Run() {
+    task_finished_ = false;
+    while (not task_finished_) {
       time.Tick();
       ProcessResumeList();
     }

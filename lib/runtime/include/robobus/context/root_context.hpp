@@ -20,7 +20,7 @@ class RootContext : public internal::NonCopyable<RootContext<Runtime>> {
  public:
   RootContext() = default;
 
-  [[noreturn]] auto Run() -> void { loop_.Run(); }
+  auto Run() -> void { loop_.Run(); }
 
   auto GetLoop() -> runtime::Loop<Runtime>& { return loop_; }
 
