@@ -29,9 +29,7 @@ class BasePromise {
     }
     is_finished = true;
     for (auto& callback : on_return_callbacks) {
-      printf("Promise/%p\n", &callback);
       callback();
-      printf("Promise/%p - ok\n", &callback);
     }
   }
 
