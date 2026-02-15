@@ -18,7 +18,4 @@ else()
     target_compile_definitions(robobus-runtime INTERFACE
         NON_THREAD=0
     )
-    target_link_libraries(robobus-runtime INTERFACE
-        syoch-robotics-thread
-    )
 endif()

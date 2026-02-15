@@ -5,17 +5,17 @@
 
 #include <coroutine>
 
+#include <Nano/linked_list.hpp>
+#include <Nano/no_mutex_lifo.hpp>
 #include <logger/logger.hpp>
-#include <robotics/utils/linked_list_node.hpp>
-#include <robotics/utils/no_mutex_lifo.hpp>
-
 #include "robobus/internal/sematicses.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
 #include "time_context.hpp"
 
 #if !defined(NON_THREAD)
 #include <chrono>
-#include <robotics/thread/thread.hpp>
+#include "NanoHW/thread.hpp"
+
 #endif
 
 namespace robobus::runtime {
@@ -29,7 +29,7 @@ struct ResumeRequest {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
-  robotics::utils::NoMutexLIFO<ResumeRequest<Runtime>, 64> resume_list_lifo_;
+  Nano::collection::NoMutexLIFO<ResumeRequest<Runtime>, 64> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
@@ -124,14 +124,14 @@ class Loop : public internal::NonCopyable<Loop<Runtime>> {
     static robotics::logger::Logger logger{"debug.loop.robobus",
                                            "Loop\x1b[32mDebug\x1b[m"};
 
-    robotics::system::Thread thread;
+    nano_hw::thread::DynThread thread;
     thread.SetThreadName("Loop-Debug");
     thread.Start([this]() {
       while (true) {
         logger.Info("Elapsed: %d, Now: %d", time.ElapsedTime().count(),
                     time.Now().time_since_epoch().count());
 
-        robotics::system::SleepFor(1s);
+        nano_hw::parallel::SleepForMS(1s);
       }
     });
   }
