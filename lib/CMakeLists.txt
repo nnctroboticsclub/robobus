@@ -6,7 +6,7 @@ add_library(robobus-dummy STATIC
 )
 
 target_link_libraries(robobus-dummy PRIVATE
-    syoch-robotics-common
+    syoch-robotics::common
     robobus-bus
     robobus-runtime
 )

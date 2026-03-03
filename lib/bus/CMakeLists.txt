@@ -7,8 +7,8 @@ target_include_directories(robobus-bus PUBLIC
 )
 
 target_link_libraries(robobus-bus PUBLIC
-    syoch-robotics-common
-    syoch-robotics-logger
-    rd16
+    syoch-robotics::common
+    syoch-robotics::logger
+    syoch-robotics::rd16
     robobus-runtime
 )
