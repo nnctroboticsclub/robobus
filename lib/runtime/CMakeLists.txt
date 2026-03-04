@@ -24,10 +24,10 @@ endif()
 
 install(TARGETS runtime
   EXPORT robobusTargets
-  INCLUDES DESTINATION include/robobus/robobus
+  INCLUDES DESTINATION include/robobus/runtime
 )
 
 install(DIRECTORY include/
-  DESTINATION include/robobus/robobus
+  DESTINATION include/robobus/runtime
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
