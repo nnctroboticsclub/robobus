@@ -6,7 +6,7 @@
 #include <coroutine>
 
 #include <Nano/linked_list.hpp>
-#include <Nano/no_mutex_lifo.hpp>
+#include <Nano/queue.hpp>
 #include <logger/logger.hpp>
 #include "robobus/internal/sematicses.hpp"
 #include "robobus/runtime/runtime_impls.hpp"
@@ -29,7 +29,7 @@ struct ResumeRequest {
 /// @brief コルーチンベースプログラムで用いるコンテキスト
 template <RuntimeImpl Runtime>
 class Loop : public internal::NonCopyable<Loop<Runtime>> {
-  Nano::collection::NoMutexLIFO<ResumeRequest<Runtime>, 64> resume_list_lifo_;
+  Nano::collection::Queue<ResumeRequest<Runtime>, 64> resume_list_lifo_;
 
  public:
   TimeContext<typename Runtime::Clock> time;
