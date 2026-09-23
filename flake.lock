@@ -241,11 +241,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775355334,
-        "narHash": "sha256-GipsobTszeH4PULwUJWVtZ2siC5LX+2qqixT1JmQhj8=",
+        "lastModified": 1790174274,
+        "narHash": "sha256-hcxsuOjRt3aF/GNlRc7wdmA1aGzZJP0bBubDABiuk0E=",
         "owner": "nnctroboticsclub",
         "repo": "nano",
-        "rev": "f4c6aa2d6e61071374bd41912d8b5ea65777516a",
+        "rev": "8990f7d178d832c4b57bb33e2139c0263efb5911",
         "type": "github"
       },
       "original": {
@@ -303,11 +303,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1772589807,
-        "narHash": "sha256-miCGTofuDqLgygI/iYPmnijJYZ2S1BQn6OUQSZoRYhY=",
+        "lastModified": 1790174939,
+        "narHash": "sha256-pEj+LUUIRKWsuQkfdJYKvVS9XoiqeMf9jh1qyWxU+GM=",
         "owner": "nnctroboticsclub",
         "repo": "roboenv-nix",
-        "rev": "5197b3bd37b4effb0559ed455a24862d41270260",
+        "rev": "3276f27844411a20222b240aa1a998500adac2fd",
         "type": "github"
       },
       "original": {
