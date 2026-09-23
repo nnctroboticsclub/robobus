@@ -1,3 +1,4 @@
+# types
 
 ## Generic
 
@@ -43,7 +44,6 @@ Interface {
   monitor_layout: MonitorLayout
 }
 ```
-
 
 ## UI
 

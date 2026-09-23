@@ -38,11 +38,10 @@
 | 5    | ^        |
 
 ## App
+
 enumerate: find, respond, reset_id, set_id, get_descriptor
 rbus: property, cell, method, signal
 interface:
   00: enumerate
   01: SDS
   10: Ident
-
-8ac7 2304 89e8 0000

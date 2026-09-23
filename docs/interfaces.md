@@ -7,6 +7,7 @@ Robobus で使用するインターフェース (機能) の一覧を記載す�
 この節では，インタフェース解説で使用する用語などについて定義する．
 
 ### Route
+
 データの転送経路のこと．
 統合回路では，CAN2 (Data CAN) などがある．
 加えて，Robobus の規格上で Slot, RawP2P, Multicast などが扱える
@@ -48,6 +49,7 @@ packet-beta
 - `Current`: 電流制御
 
 例えば次のデバイスは次のモードをサポートしているべきである
+
 ```plain
 BLDC: RawVelocity
 DC: RawVelocity

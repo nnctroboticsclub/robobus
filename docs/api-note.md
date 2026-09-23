@@ -27,3 +27,4 @@ Module test_mod(Context ctx, struct {
     motor_2 = (stick[0] + stick[1]) / 1.41;
   });
 }
+```

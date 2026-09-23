@@ -1,3 +1,6 @@
+# fw-note
+
+```cpp
 using DeviceID = uint8_t;
 
 template <typename T>
@@ -27,3 +30,4 @@ Module test_mod(Context ctx, struct { Joystick move; } input) {
     motor_2 = (stick[0] + stick[1]) / 1.41;
   });
 }
+```
