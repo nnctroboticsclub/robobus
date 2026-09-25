@@ -171,11 +171,11 @@
       },
       "locked": {
         "dir": "legacy",
-        "lastModified": 1790318393,
-        "narHash": "sha256-KDAh9AwbvnE7G/84mmEJBh7uc80tZ/FEvtHsw/Ox/EA=",
+        "lastModified": 1790318595,
+        "narHash": "sha256-fjfN+d7fW0JoDBYJ4QdPYKvh61ojjiFvTiZk3lNvgpI=",
         "owner": "nnctroboticsclub",
         "repo": "robopkgs-nix",
-        "rev": "e8a89e2c93c04622bb3d4232b0f1f573ec7973f7",
+        "rev": "fb80ce4d2e44078b39c8fce2bb8e342aa838756d",
         "type": "github"
       },
       "original": {
@@ -821,11 +821,11 @@
         "roboenv": "roboenv_6"
       },
       "locked": {
-        "lastModified": 1790318445,
-        "narHash": "sha256-yylnZBrtwC+0YbxYDosZe9JKUBfgMSgfsm5pvIf/1wc=",
+        "lastModified": 1790318616,
+        "narHash": "sha256-GxOI4pa0mrnil4HFqqBCJS+2y+gB3gq3TYdbJiHxKH4=",
         "owner": "nnctroboticsclub",
         "repo": "syoch-robotics",
-        "rev": "3ffe803dc66872f4690c21fb6fe8d301846fce1d",
+        "rev": "2ecba3470f23afe5c58cd7eb99a68922688f25b2",
         "type": "github"
       },
       "original": {
