@@ -1,17 +1,8 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/25.11";
-
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/26.05";
   inputs.roboenv.url = "github:nnctroboticsclub/roboenv-nix";
-  inputs.roboenv.inputs.nixpkgs.follows = "nixpkgs";
-
   inputs.nano.url = "github:nnctroboticsclub/nano";
-  inputs.nano.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.nano.inputs.roboenv.follows = "roboenv";
-
   inputs.syoch-robotics.url = "github:nnctroboticsclub/syoch-robotics";
-  inputs.syoch-robotics.inputs.nano.follows = "nano";
-  inputs.syoch-robotics.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.syoch-robotics.inputs.roboenv.follows = "roboenv";
 
   outputs =
     {

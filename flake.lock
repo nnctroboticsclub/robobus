@@ -104,6 +104,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "syoch-robotics",
           "roboenv",
           "nixpkgs"
         ]
@@ -217,11 +218,11 @@
       },
       "locked": {
         "dir": "legacy",
-        "lastModified": 1772453516,
-        "narHash": "sha256-UBs3bEehY5daXHt/wa1mjA3naBqQ32/Lgp1khVV8B2s=",
+        "lastModified": 1777474115,
+        "narHash": "sha256-ikTgFmmc4bccI0H6UZghoUFQ+uSAI1o8E9FtciuEiyQ=",
         "ref": "refs/heads/main",
-        "rev": "5417661913a3a636f04c2265941172f62150ba3f",
-        "revCount": 14,
+        "rev": "1a48242bd2e5b68f34e549e3e03587ed47d30a1c",
+        "revCount": 27,
         "type": "git",
         "url": "ssh://git@github.com/nnctroboticsclub/robopkgs-nix"
       },
@@ -233,19 +234,40 @@
     },
     "nano": {
       "inputs": {
+        "nixpkgs": "nixpkgs",
+        "roboenv": "roboenv"
+      },
+      "locked": {
+        "lastModified": 1790316946,
+        "narHash": "sha256-eqXnpuFkibka5JRNdqc5XimaxVyeRasfIXT2+wBjc58=",
+        "owner": "nnctroboticsclub",
+        "repo": "nano",
+        "rev": "bfb7e4a90056dea87711916da2af93cce4934461",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nnctroboticsclub",
+        "repo": "nano",
+        "type": "github"
+      }
+    },
+    "nano_2": {
+      "inputs": {
         "nixpkgs": [
+          "syoch-robotics",
           "nixpkgs"
         ],
         "roboenv": [
+          "syoch-robotics",
           "roboenv"
         ]
       },
       "locked": {
-        "lastModified": 1790174274,
-        "narHash": "sha256-hcxsuOjRt3aF/GNlRc7wdmA1aGzZJP0bBubDABiuk0E=",
+        "lastModified": 1790175470,
+        "narHash": "sha256-g70b5g1K0O2N+bdnspvXt4AKAA0ugeCehSiDuY2Z3+U=",
         "owner": "nnctroboticsclub",
         "repo": "nano",
-        "rev": "8990f7d178d832c4b57bb33e2139c0263efb5911",
+        "rev": "5fc452d8eba57bdb276c4bf083601b039d2888fd",
         "type": "github"
       },
       "original": {
@@ -258,6 +280,7 @@
       "inputs": {
         "flake-compat": "flake-compat",
         "nixpkgs": [
+          "syoch-robotics",
           "roboenv",
           "nixpkgs"
         ]
@@ -279,6 +302,54 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1790291545,
+        "narHash": "sha256-WQhNWIW3PPijuZexyl5Zf0tJuQ7sKt5C9WPXVO4pMuM=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "7486293a941f7b0ec123f0c431517027f705f60f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "release-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1780145889,
+        "narHash": "sha256-md0zn0RnwNvPyASas1yG5YUuwQ4ALA6ucL50l0DvqCo=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8c50a710ddca43d7a530fb805ad55bde8d0141c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1790291545,
+        "narHash": "sha256-WQhNWIW3PPijuZexyl5Zf0tJuQ7sKt5C9WPXVO4pMuM=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "7486293a941f7b0ec123f0c431517027f705f60f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "release-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1764521362,
         "narHash": "sha256-M101xMtWdF1eSD0xhiR8nG8CXRlHmv6V+VoY65Smwf4=",
         "owner": "nixos",
@@ -293,14 +364,101 @@
         "type": "github"
       }
     },
+    "pyproject-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nano",
+          "roboenv",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788394333,
+        "narHash": "sha256-xYOP0Xym1eVGUaHFx+eJEaycFGoiCbst3fZf0xFHP78=",
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "rev": "6a8a7881d75b6f98967e7b8069f4ead331384301",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "type": "github"
+      }
+    },
+    "pyproject-nix_2": {
+      "inputs": {
+        "nixpkgs": [
+          "roboenv",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788394333,
+        "narHash": "sha256-xYOP0Xym1eVGUaHFx+eJEaycFGoiCbst3fZf0xFHP78=",
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "rev": "6a8a7881d75b6f98967e7b8069f4ead331384301",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "type": "github"
+      }
+    },
     "roboenv": {
+      "inputs": {
+        "nixpkgs": [
+          "nano",
+          "nixpkgs"
+        ],
+        "pyproject-nix": "pyproject-nix",
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1790316429,
+        "narHash": "sha256-Rv5ksXhRmsxuXtqc8Ll+32JXjSYHMfZqeoR2Lknozh4=",
+        "owner": "nnctroboticsclub",
+        "repo": "roboenv-nix",
+        "rev": "cf5df2fb670629685e6786f9d00e12395553de26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nnctroboticsclub",
+        "repo": "roboenv-nix",
+        "type": "github"
+      }
+    },
+    "roboenv_2": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3",
+        "pyproject-nix": "pyproject-nix_2",
+        "rust-overlay": "rust-overlay_2"
+      },
+      "locked": {
+        "lastModified": 1790316429,
+        "narHash": "sha256-Rv5ksXhRmsxuXtqc8Ll+32JXjSYHMfZqeoR2Lknozh4=",
+        "owner": "nnctroboticsclub",
+        "repo": "roboenv-nix",
+        "rev": "cf5df2fb670629685e6786f9d00e12395553de26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nnctroboticsclub",
+        "repo": "roboenv-nix",
+        "type": "github"
+      }
+    },
+    "roboenv_3": {
       "inputs": {
         "home-manager": "home-manager",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": [
+          "syoch-robotics",
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay"
+        "rust-overlay": "rust-overlay_3"
       },
       "locked": {
         "lastModified": 1790174939,
@@ -319,14 +477,58 @@
     "root": {
       "inputs": {
         "nano": "nano",
-        "nixpkgs": "nixpkgs",
-        "roboenv": "roboenv",
+        "nixpkgs": "nixpkgs_2",
+        "roboenv": "roboenv_2",
         "syoch-robotics": "syoch-robotics"
       }
     },
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
+          "nano",
+          "roboenv",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790234952,
+        "narHash": "sha256-tjQa1vDoHJir4lasZTakz/xgmsfB6SRjeQqaIbefFOk=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed34466c59b766481248959a21a6e46cf0c60468",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "roboenv",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790234952,
+        "narHash": "sha256-tjQa1vDoHJir4lasZTakz/xgmsfB6SRjeQqaIbefFOk=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed34466c59b766481248959a21a6e46cf0c60468",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "syoch-robotics",
           "roboenv",
           "nixpkgs"
         ]
@@ -365,22 +567,16 @@
     "syoch-robotics": {
       "inputs": {
         "legacy-pkgs": "legacy-pkgs",
-        "nano": [
-          "nano"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "roboenv": [
-          "roboenv"
-        ]
+        "nano": "nano_2",
+        "nixpkgs": "nixpkgs_4",
+        "roboenv": "roboenv_3"
       },
       "locked": {
-        "lastModified": 1775355479,
-        "narHash": "sha256-OgqUqJip0SkLxufO8vHwYTATJSrwV3dOHue3qOBT+CY=",
+        "lastModified": 1790175533,
+        "narHash": "sha256-067T8TWEPSTeYXm8jbiU3UOHEle6YScOoazIQjtIGY8=",
         "owner": "nnctroboticsclub",
         "repo": "syoch-robotics",
-        "rev": "1e09451bccba05f34fe6f65befab1fe411034662",
+        "rev": "8659c985047dd0a11028688016b8c285282013ce",
         "type": "github"
       },
       "original": {
